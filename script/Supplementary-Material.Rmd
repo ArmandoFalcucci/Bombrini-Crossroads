@@ -1,0 +1,1078 @@
+---
+title: Supplementary Material (SM)
+subtitle: "A crossroads between the Mediterranean and the Alps: Lithic technology and mobility in the Aurignacian of Riparo Bombrini (Liguria, northwestern Italy)"
+knit: (function(input, ...) {
+    rmarkdown::render(
+      input,
+      output_dir = "../output"
+    )
+  })
+date: ''
+output: 
+  word_document:
+    toc: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r include=FALSE}
+## packages used
+library(readxl)
+library(knitr)
+library(kableExtra)
+library(dplyr)
+library(tidyr)
+library(janitor)
+library(forcats)
+library(rstatix)
+library(tidyverse)
+library(MetBrewer)
+library(plyr)
+library(forcats)
+library(scales)
+library(cowplot)
+library(ggpubr)
+library(xtable)
+library(flextable)
+
+Dataset <- read.csv("../data/RB_dataset.csv")
+Dataset_cores <- read.csv("../data/RB_dataset_cores.csv")
+
+comparison.A2.A1 <- list(c("A2", "A1"))
+
+zapotec_palette <- c(
+  "Local" = "#D14A34",        # Bold red
+  "Circum-local" = "#C09B29", # Rich blue
+  "Distant" = "#3D6F9E",      # Earthy orange
+  "Very distant" = "#F1A64C"# Golden yellow
+)
+
+A1_A2_palette <- c(
+  "A1" = "#6F9E58",   # Calming green for A1
+  "A2" = "#8A3E28"    # Deep red for A2
+)
+
+Local_NonLocal_palette <- c(
+  "Local" = "#C75C4A",   # Warm terracotta red for Local (Adobe color)
+  "Non-local" = "#A58D65" # Muted sandy beige for Non-local (Desert earth tone)
+)
+```
+
+<br>
+
+## SM Figures
+
+### Figure S1
+```{r, echo=FALSE, warning=FALSE, include=T, fig.width=6}
+Dataset %>%
+  filter(Class %in% c("Blank", "Tool", "Core-Tool")) %>%
+  # filter(Blank != "Undetermined") %>%
+  ggstatsplot::ggbarstats(
+  x = Blank,  
+  y = Layer,  
+  results.subtitle = FALSE,
+  palette = "Set3")
+```
+  **Figure S1.** Distribution of blank types with percentages across layers A2 and A1.
+
+<br>
+
+### Figure S2
+
+```{r, echo=FALSE, warning=FALSE, include=FALSE, fig.width=8}
+laminar.blanks.complete <- Dataset %>%
+filter(Layer != "A0", Blank == "Blade" | Blank == "Bladelet", Preservation == "Complete") %>%
+  select(ID, Layer, Blank, Length)
+  # mutate(Class = recode(Class, Blank = "Maintenance", Tool = "Maintenance"))
+
+flak_surf_lenght <- Dataset_cores %>%
+  filter(Layer != "A0", Core.classification != "Shatter" & Core.classification != "Tested", Laminar == "yes") %>%
+  mutate(Core.type = "Laminar core") %>%
+  select(ID, Layer, Core.type, Flaking.surface.length) %>%
+  dplyr::rename(Blank = Core.type, Length = Flaking.surface.length) %>%
+  drop_na()
+```
+```{r, echo=FALSE, warning=FALSE, include=FALSE, fig.width=8}
+comparison_cores.blanks <- full_join(laminar.blanks.complete, flak_surf_lenght)
+```
+```{r, echo=FALSE, warning=FALSE, fig.width=8}
+comparison_cores.blanks %>%
+  ggplot(aes(x = Layer, y = Length)) +
+  geom_boxplot(aes(fill = Blank)) +
+  # stat_compare_means(aes(group = Blank), label.y = 37) +
+  # geom_jitter(shape=16, position=position_jitter(width = 0.1)) +
+  ggthemes::theme_clean() +
+  scale_fill_manual(values=met.brewer("Navajo")) +
+  theme(text = element_text(size = 18),
+        axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14),
+        legend.text = element_text(size = 12)) +
+  labs(y= "Length (mm)")
+```
+  **Figure S2.** Boxplots comparing the lengths of complete blades and bladelets with the flaking surface lengths of laminar cores across layers A1 and A2. Refer to the legend for color coding.
+
+<br>
+
+### Figure S3
+
+```{r, echo=FALSE, warning=FALSE, fig.width=6}
+bladelet.plat.width <- Dataset %>%
+  filter(Blank == "Bladelet",
+           Preservation == "Complete" | Preservation == "Proximal",
+           Class == "Blank" | Class == "Tool",
+         Layer != "A0") %>%
+  select(Layer, Platform.type, Platform.width, Platform.thickness) %>%
+  drop_na() %>%
+  group_by(Layer) %>%
+  # rename(`Platform width` = Platform.width) %>%
+  ggplot(aes(x = Layer, y = Platform.width)) +
+  geom_boxplot(aes(fill = Layer)) +
+  stat_compare_means(aes(group = Layer)) +
+  geom_jitter(shape=16, position=position_jitter(width = 0.2), alpha = 0.2, size = 0.7) +
+  ggthemes::theme_clean() +
+  scale_fill_manual(values = A1_A2_palette) +
+  theme(text = element_text(size = 18),
+        axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14),
+        legend.position = "none") +
+  labs(y= "Platform width (mm)")
+
+
+bladelet.plat.thickness <- Dataset %>%
+  filter(Blank == "Bladelet",
+           Preservation == "Complete" | Preservation == "Proximal",
+           Class == "Blank" | Class == "Tool",
+         Layer != "A0") %>%
+  select(Layer, Platform.type, Platform.width, Platform.thickness) %>%
+  drop_na() %>%
+  group_by(Layer) %>%
+    dplyr::rename(`Platform thickness` = Platform.thickness) %>%
+  ggplot(aes(x = Layer, y = `Platform thickness`)) +
+  geom_boxplot(aes(fill = Layer)) +
+  stat_compare_means(aes(group = Layer)) +
+  geom_jitter(shape=16, position=position_jitter(width = 0.2), alpha = 0.2, size = 0.7) +
+  ggthemes::theme_clean() +
+  scale_fill_manual(values = A1_A2_palette) +
+  theme(text = element_text(size = 18),
+        axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14),
+        legend.position = "none") +
+  labs(y= "Platform thickness (mm)")
+
+ggarrange(bladelet.plat.width, bladelet.plat.thickness,
+          labels = c("a", "b"))
+
+```
+  **Figure S#.**  Boxplots showing the distribution of platform width (a) and thickness (b) values in layers A1 and A2. The figure includes the results of the Wilcoxon tests, which confirm the similarity of these attributes between the two layers.
+
+<br>
+
+### Figure S4
+
+```{r, echo=FALSE, warning=FALSE, fig.width=8}
+bladelet.length <- Dataset %>%
+  filter(Blank == "Bladelet",
+           Preservation == "Complete",
+           Class == "Blank",
+         Layer != "A0") %>%
+  group_by(Layer) %>%
+  ggplot(aes(x = Layer, y = Length)) +
+  geom_boxplot(aes(fill = Layer)) +
+  # stat_compare_means(comparison = comparison.A2.A1) +
+  stat_compare_means(label.y = 60) +
+  geom_jitter(shape=16, position=position_jitter(width = 0.2), alpha = 0.2, size = 0.7) +
+  # geom_jitter(shape=16, position=position_jitter(width = 0.1)) +
+  ggthemes::theme_clean() +
+  scale_fill_manual(values = A1_A2_palette) +
+  theme(text = element_text(size = 18),
+        axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14),
+        legend.position = "none") +
+  labs(y= "Length (mm)")
+
+
+bladelet.width <- Dataset %>%
+  filter(Blank == "Bladelet",
+           Preservation == "Complete",
+           Class == "Blank",
+         Layer != "A0") %>%
+  group_by(Layer) %>%
+  ggplot(aes(x = Layer, y = Width)) +
+  geom_boxplot(aes(fill = Layer)) +
+  # stat_compare_means(comparison = comparison.A2.A1) +
+  stat_compare_means(label.y = 17.5) +
+  # geom_jitter(shape=16, position=position_jitter(width = 0.1)) +
+  geom_jitter(shape=16, position=position_jitter(width = 0.2), alpha = 0.2, size = 0.7) +
+  ggthemes::theme_clean() +
+  scale_fill_manual(values = A1_A2_palette) +
+  theme(text = element_text(size = 18),
+        axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14),
+        legend.position = "none") +
+  labs(y= "Width (mm)")
+
+
+bladelet.thickness <- Dataset %>%
+  filter(Blank == "Bladelet",
+           Preservation == "Complete",
+           Class == "Blank",
+         Layer != "A0") %>%
+  group_by(Layer) %>%
+  ggplot(aes(x = Layer, y = Thickness)) +
+  geom_boxplot(aes(fill = Layer)) +
+  # stat_compare_means(comparison = comparison.A2.A1) +
+  stat_compare_means(label.y = 13) +
+  geom_jitter(shape=16, position=position_jitter(width = 0.2), alpha = 0.2, size = 0.7) +
+  # geom_jitter(shape=16, position=position_jitter(width = 0.1)) +
+  ggthemes::theme_clean() +
+  scale_fill_manual(values = A1_A2_palette) +
+  theme(text = element_text(size = 18),
+        axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14),
+        legend.position = "none") +
+  labs(y= "Thickness (mm)")
+
+ggarrange(bladelet.length, bladelet.width, bladelet.thickness,
+          labels = c("a", "b", "c"), nrow=1)
+```
+  **Figure S#.** Boxplots showing the distribution of length (a), width (b), and thickness (c) of non-modified complete bladelets from layers A1 and A2. The figure includes the results of the Wilcoxon tests, which show that the only statistically significant difference is in the width of the bladelets.
+
+<br>
+
+### Figure S5
+
+```{r, echo=FALSE, warning=FALSE, fig.width=8}
+bladelet.elongation <- Dataset %>%
+  filter(Blank == "Bladelet",
+           Preservation == "Complete",
+           Class == "Blank",
+         Layer != "A0") %>%
+  group_by(Layer) %>%
+  ggplot(aes(x = Layer, y = Elongation)) +
+  geom_boxplot(aes(fill = Layer)) +
+  stat_compare_means(label.y = 16) +
+  geom_jitter(shape=16, position=position_jitter(width = 0.2), alpha = 0.2, size = 0.5) +
+  ggthemes::theme_clean() +
+  scale_fill_manual(values = A1_A2_palette) +
+  theme(text = element_text(size = 18),
+        axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14),
+        legend.position = "none") +
+  labs(y= "Elongation")
+
+bladelet.robustness <- Dataset %>%
+  filter(Blank == "Bladelet",
+           Preservation == "Complete",
+           Class == "Blank",
+         Layer != "A0") %>%
+  group_by(Layer) %>%
+  ggplot(aes(x = Layer, y = Robustness)) +
+  geom_boxplot(aes(fill = Layer)) +
+  stat_compare_means(label.y = 11) +
+  geom_jitter(shape=16, position=position_jitter(width = 0.2), alpha = 0.2, size = 0.5) +
+  ggthemes::theme_clean() +
+  scale_fill_manual(values = A1_A2_palette) +
+  theme(text = element_text(size = 18),
+        axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14),
+        legend.position = "none") +
+  labs(y= "Robustness")
+
+
+ggarrange(bladelet.elongation, bladelet.robustness,
+          labels = c("a", "b"), nrow=1)
+```
+  **Figure S#.** Boxplots showing the distribution of elongation (a) and robustness (b) ratios of bladelets in layers A1 and A2. The figure includes the results of the Wilcoxon tests, which confirm the similarity of these attributes between the layers.
+
+<br>
+
+### Figure S6
+
+```{r, echo=FALSE, warning=FALSE, fig.width=8}
+bladelet.A2.length.raw.mat <- Dataset %>%
+  filter(Blank == "Bladelet",
+           Preservation == "Complete",
+           Class == "Blank",
+         Layer == "A2",
+         raw.material.lumped != "Undetermined" & raw.material.lumped != "not.available") %>%
+  mutate(Provenance = case_when(
+    raw.material.lumped == "Local" ~ "Local",
+    raw.material.lumped %in% c("Circum.local", "Distant", "Very.distant") ~ "Non-local"
+  )) %>%
+  group_by(Layer) %>%
+  ggplot(aes(x = Provenance, y = Length)) +
+  geom_boxplot(aes(fill = Provenance)) +
+  stat_compare_means(comparison = comparison.A2.A1) +
+  stat_compare_means(label.y = 60) +
+  geom_jitter(shape=16, position=position_jitter(width = 0.2), alpha = 0.2, size = 0.7) +
+  # geom_jitter(shape=16, position=position_jitter(width = 0.1)) +
+  ggthemes::theme_clean() +
+  scale_fill_manual(values=Local_NonLocal_palette) +
+  theme(text = element_text(size = 18),
+        axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14),
+        legend.position = "none") +
+  labs(y= "Length (mm)")
+
+
+bladelet.A2.width.raw.mat <- Dataset %>%
+  filter(Blank == "Bladelet",
+           Preservation == "Complete",
+           Class == "Blank",
+         Layer == "A2",
+         raw.material.lumped != "Undetermined" & raw.material.lumped != "not.available") %>%
+  mutate(Provenance = case_when(
+    raw.material.lumped == "Local" ~ "Local",
+    raw.material.lumped %in% c("Circum.local", "Distant", "Very.distant") ~ "Non-local"
+  )) %>%
+  group_by(Layer) %>%
+  ggplot(aes(x = Provenance, y = Width)) +
+  geom_boxplot(aes(fill = Provenance)) +
+  stat_compare_means(comparison = comparison.A2.A1) +
+  stat_compare_means(label.y = 13) +
+  # geom_jitter(shape=16, position=position_jitter(width = 0.1)) +
+  geom_jitter(shape=16, position=position_jitter(width = 0.2), alpha = 0.2, size = 0.7) +
+  ggthemes::theme_clean() +
+  scale_fill_manual(values=Local_NonLocal_palette) +
+  theme(text = element_text(size = 18),
+        axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14),
+        legend.position = "none") +
+  labs(y= "Width (mm)")
+
+
+bladelet.A2.thickness.raw.mat <- Dataset %>%
+  filter(Blank == "Bladelet",
+           Preservation == "Complete",
+           Class == "Blank",
+         Layer == "A2",
+         raw.material.lumped != "Undetermined" & raw.material.lumped != "not.available") %>%
+  mutate(Provenance = case_when(
+    raw.material.lumped == "Local" ~ "Local",
+    raw.material.lumped %in% c("Circum.local", "Distant", "Very.distant") ~ "Non-local"
+  )) %>%
+  group_by(Layer) %>%
+  ggplot(aes(x = Provenance, y = Thickness)) +
+  geom_boxplot(aes(fill = Provenance)) +
+  stat_compare_means(comparison = comparison.A2.A1) +
+  stat_compare_means(label.y = 10) +
+  geom_jitter(shape=16, position=position_jitter(width = 0.2), alpha = 0.2, size = 0.7) +
+  # geom_jitter(shape=16, position=position_jitter(width = 0.1)) +
+  ggthemes::theme_clean() +
+  scale_fill_manual(values=Local_NonLocal_palette) +
+  theme(text = element_text(size = 18),
+        axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14),
+        legend.position = "none") +
+  labs(y= "Thickness (mm)")
+
+ggarrange(bladelet.A2.length.raw.mat, bladelet.A2.width.raw.mat, bladelet.A2.thickness.raw.mat,
+          labels = c("a", "b", "c"), nrow=1,
+          common.legend = TRUE,
+          legend = "bottom")
+```
+  **Fig. S#.** Boxplots showing the distribution of length (a), width (b), and thickness (c) of non-modified complete bladelets from layers A1 and A2, categorized by local and non-local (i.e., circum-local, distant, and very distant) raw materials. The figure includes the results of the Wilcoxon tests, which show no statistically significant differences in any of the comparisons.
+
+<br>
+
+### Figure S7
+
+```{r, echo=FALSE, fig.width=5}
+knitr::include_graphics("../output/figures/Figure_Screeplot.png")
+# in the R chunk you can add "fig.cap="Screeplot"" to put the caption below
+```
+  **Figure S#.** Scree plot illustrating the proportion of variance explained by the first eight principal components of the 2D outline analysis.
+
+<br>
+
+### Figure S8
+
+```{r, echo=FALSE, fig.width=5}
+knitr::include_graphics("../output/figures/Shape_variation_plot.png")
+# in the R chunk you can add "fig.cap="Screeplot"" to put the caption below
+```
+  **Figure S#.** Plot displaying the shape variation across the first three principal components (PCs) of the 2D outline analysis. The mean shape and standard deviation (SD) are shown for each component.
+
+<br>
+
+### Figure S9
+
+```{r, echo=FALSE, warning=FALSE, fig.width=6}
+Dataset %>%
+  mutate(Class = recode(Class, `Core-Tool` = "Tool")) %>%
+  filter(Layer != "A0", Class == "Tool", Blank != "Bladelet") %>%
+  ggstatsplot::ggbarstats(
+  x = Blank,  
+  y = Layer,  
+  results.subtitle = F,
+  palette = "Set3")
+```
+  **Figure S#.** Selection of blank types used for fabricating tools, excluding retouched bladelets, across layers A1 and A2. Rounded percentages are provided within the bars.
+
+<br>
+
+### Figure S10
+
+```{r, echo=FALSE, warning=FALSE, fig.width=8}
+ret.bladelet.length <- Dataset %>%
+  filter(Blank == "Bladelet",
+           Preservation == "Complete",
+           Typology.new == "Retouched bladelet",
+         Layer != "A0") %>%
+  group_by(Layer) %>%
+  ggplot(aes(x = Layer, y = Length)) +
+  geom_boxplot(aes(fill = Layer)) +
+  # stat_compare_means(comparison = comparison.A2.A1) +
+  stat_compare_means(label.y = 40) +
+  geom_jitter(shape=16, position=position_jitter(width = 0.2), alpha = 0.2, size = 0.7) +
+  # geom_jitter(shape=16, position=position_jitter(width = 0.1)) +
+  ggthemes::theme_clean() +
+  scale_fill_manual(values=A1_A2_palette) +
+  theme(text = element_text(size = 18),
+        axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14),
+        legend.position = "none") +
+  labs(y= "Length (mm)")
+
+
+ret.bladelet.width <- Dataset %>%
+  filter(Blank == "Bladelet",
+           Typology.new == "Retouched bladelet",
+         Layer != "A0") %>%
+  group_by(Layer) %>%
+  ggplot(aes(x = Layer, y = Width)) +
+  geom_boxplot(aes(fill = Layer)) +
+  # stat_compare_means(comparison = comparison.A2.A1) +
+  stat_compare_means(label.y = 17.5) +
+  # geom_jitter(shape=16, position=position_jitter(width = 0.1)) +
+  geom_jitter(shape=16, position=position_jitter(width = 0.2), alpha = 0.2, size = 0.7) +
+  ggthemes::theme_clean() +
+  scale_fill_manual(values=A1_A2_palette) +
+  theme(text = element_text(size = 18),
+        axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14),
+        legend.position = "none") +
+  labs(y= "Width (mm)")
+
+
+ret.bladelet.thickness <- Dataset %>%
+  filter(Blank == "Bladelet",
+           Typology.new == "Retouched bladelet",
+         Layer != "A0") %>%
+  group_by(Layer) %>%
+  ggplot(aes(x = Layer, y = Thickness)) +
+  geom_boxplot(aes(fill = Layer)) +
+  # stat_compare_means(comparison = comparison.A2.A1) +
+  stat_compare_means(label.y = 13) +
+  geom_jitter(shape=16, position=position_jitter(width = 0.2), alpha = 0.2, size = 0.7) +
+  # geom_jitter(shape=16, position=position_jitter(width = 0.1)) +
+  ggthemes::theme_clean() +
+  scale_fill_manual(values=A1_A2_palette) +
+  theme(text = element_text(size = 18),
+        axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14),
+        legend.position = "none") +
+  labs(y= "Thickness (mm)")
+
+ggarrange(ret.bladelet.length, ret.bladelet.width, ret.bladelet.thickness,
+          labels = c("a", "b", "c"), nrow=1)
+```
+  **Figure S#.** Boxplots showing the distribution of length (a), width (b), and thickness (c) of retouched bladelets from layers A1 and A2. For width and thickness, broken bladelets are also included. The figure includes the results of the Wilcoxon tests, which confirm the high similarity between retouched bladelets from layers A1 and A2.
+
+<br>
+
+### Figure S11
+
+```{r, echo=FALSE, warning=FALSE, fig.width=4}
+Dataset_cores %>%
+  filter(Layer == "A0", Core.type != "Shatter") %>%
+  ggplot(aes(x = log10(Volume), y = logSDI, color = Core.classification)) +
+  geom_point(alpha = 0.8, size = 3) +
+  ggthemes::theme_clean() +
+  theme(text = element_text(size = 18),
+        axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14),
+        legend.position = "right") +
+  labs(x = "logVolume", y = "logSDI", color = "Layer")
+```
+  **Figure S#.** Logarithmically transformed Scar Density Index (logSDI) plotted against the logarithmically transformed volume (logVolume) of cores from layer A0, colored by technological classification. Core shatters are excluded from the analysis.
+
+<br>
+
+## SM Tables
+
+### Table S1
+
+```{r, echo=FALSE, warning=FALSE}
+Dataset %>%
+  filter(Class != "Pebble", Layer != "A0") %>%
+  mutate(raw.material.type.new = recode(raw.material.type, Unknown = "Undetermined"),
+         raw.material.type = fct_relevel(raw.material.type, 
+                                             "Chert", "Jasper", "Quartzarenite", 
+                                             "Magmatic rock", "Metamorphic rock", 
+                                             "Volcanic rock", "Undetermined")) %>%
+  dplyr::rename(`Raw material` = raw.material.type) %>%
+  tabyl(`Raw material`, Layer) %>%
+  adorn_totals("col") %>%
+  adorn_totals("row") %>%
+  adorn_percentages("col") %>%
+  adorn_pct_formatting(digits = 1) %>%
+  adorn_ns(position = "front") %>%
+  flextable() %>%
+  theme_vanilla() %>%
+  set_table_properties(layout = "autofit") %>%
+  autofit()
+```
+  **Table S1.** Distribution of raw material types across layers A2 and A1, with percentages provided in brackets.
+
+<br>
+
+### Table S2
+
+```{r, echo=FALSE, warning=FALSE}
+Dataset %>%
+  filter(Class != "Pebble", Layer != "A0", raw.material.source != "not.available") %>%
+  mutate(raw.material.source = str_replace_all(raw.material.source, "\\.", " "),  # Remove periods
+         raw.material.source = fct_relevel(raw.material.source, 
+                                           "Local", 
+                                           "Circum-local France", 
+                                           "Distant France", 
+                                           "Very-distant France", 
+                                           "Distant Italy", 
+                                           "Very-distant Italy", 
+                                           "Undetermined")) %>%
+  dplyr::rename(Provenance = raw.material.source) %>%  # Rename column
+  tabyl(Provenance, Layer) %>%
+  adorn_totals("col") %>%
+  adorn_totals("row") %>%
+  adorn_percentages("col") %>%
+  adorn_pct_formatting(digits = 1) %>%
+  adorn_ns(position = "front") %>%
+  flextable() %>%
+  theme_vanilla() %>%
+  set_table_properties(layout = "autofit") %>%
+  autofit()
+```
+  **Table S2.** Distribution of raw material provenance across layers A2 and A1, with percentages provided in brackets. Lithics with unavailable raw material data are excluded from the table.
+
+<br>
+
+### Table S3
+
+```{r, echo=FALSE, warning=FALSE}
+Dataset %>%
+  filter(Layer != "A0") %>%
+  tabyl(Layer, Cortex) %>%
+  adorn_totals("col") %>%
+  adorn_totals("row") %>%
+  adorn_percentages("row") %>%
+  adorn_pct_formatting(digits = 1) %>%
+  adorn_ns(position = "front") %>%
+  flextable() %>%
+  theme_vanilla() %>%
+  set_table_properties(layout = "autofit") %>%
+  autofit()
+```  
+  **Table S3.** Distribution of cortex coverage across layers A2 and A1, with percentages provided in brackets.
+
+<br>
+
+### Table S4
+```{r, echo=FALSE, warning=FALSE}
+Dataset %>%
+  filter(Layer != "A0", Technology == "Initialization") %>%
+  tabyl(Layer, Blank.technology) %>%
+  adorn_totals("row") %>%
+  adorn_percentages("col") %>%
+  adorn_pct_formatting(digits = 1) %>%
+  adorn_ns(position = "front") %>%
+  flextable() %>%
+  theme_vanilla() %>%
+  set_table_properties(layout = "autofit") %>%
+  autofit()
+```  
+  **Table S4.** Distribution of blanks associated with the initialization core reduction phase across Layers A2 and A1, with percentages provided in brackets.
+
+<br>
+
+### Table S5
+
+```{r, echo=FALSE, warning=FALSE}
+Dataset %>%
+  filter(Layer != "A0", Technology == "Initialization") %>%
+  filter(!raw.material.lumped %in% c("not.available", "Undetermined")) %>%
+  mutate(raw.material.lumped = fct_relevel(raw.material.lumped, 
+                                           "Local", 
+                                           "Circum.local", 
+                                           "Distant", 
+                                           "Very.distant")) %>%
+  mutate(raw.material.lumped = str_replace_all(raw.material.lumped, "Circum.local", "Circum-local"),  # Rename Circum.local
+         raw.material.lumped = str_replace_all(raw.material.lumped, "Very.distant", "Very distant")) %>%  # Rename Very.distant
+  droplevels() %>%  # Drop unused factor levels
+  tabyl(Layer, raw.material.lumped) %>%
+  adorn_totals("col") %>%
+  adorn_totals("row") %>%
+  adorn_percentages("row") %>%
+  adorn_pct_formatting(digits = 1) %>%
+  adorn_ns(position = "front") %>%
+  flextable() %>%
+  theme_vanilla() %>%
+  set_table_properties(layout = "autofit") %>%
+  autofit()
+```  
+  **Table S5.** Distribution of raw materials, sorted according to their provenance, associated with initialization blanks across layers A2 and A1, with percentages provided in brackets. Undetermined and unknown categories are excluded.
+
+<br>
+
+### Table S6
+
+```{r, echo=FALSE, warning=FALSE}
+Dataset %>%
+  filter(Layer != "A0", Class == "Blank", Blank == "Blade") %>%
+  tabyl(Layer, Technology) %>%
+  adorn_totals("col") %>%
+  adorn_totals("row") %>%
+  adorn_percentages("row") %>%
+  adorn_pct_formatting(digits = 1) %>%
+  adorn_ns(position = "front") %>%
+  flextable() %>%
+  theme_vanilla() %>%
+  set_table_properties(layout = "autofit") %>%
+  autofit()
+```  
+  **Table S6.** Distribution of technological categories among non-modified blades across layers A2 and A1, with percentages provided in brackets.
+
+<br>
+
+### Table S7
+
+```{r, echo=FALSE, warning=FALSE}
+Dataset %>%
+  filter(Layer != "A0", Class == "Tool", Blank == "Blade") %>%
+  tabyl(Layer, Technology) %>%
+  adorn_totals("col") %>%
+  adorn_totals("row") %>%
+  adorn_percentages("row") %>%
+  adorn_pct_formatting(digits = 1) %>%
+  adorn_ns(position = "front") %>%
+  flextable() %>%
+  theme_vanilla() %>%
+  set_table_properties(layout = "autofit") %>%
+  autofit()
+```
+  **Table S7.** Distribution of technological categories among blade tools across layers A2 and A1, with percentages provided in brackets.
+
+<br>
+
+### Table S8
+
+```{r, echo=FALSE, warning=FALSE}
+Dataset_cores %>%
+  dplyr::rename(Classification = "Core.classification") %>%
+  filter(Layer != "A0", Classification != "Shatter" & Classification != "Tested", Laminar == "yes") %>% 
+  tabyl(Layer, Flaking.surface) %>%
+  adorn_totals("row") %>%
+  adorn_totals("col") %>%
+  adorn_percentages("row") %>%
+  adorn_pct_formatting(digits = 0) %>%
+  adorn_ns(position = "front") %>%
+  flextable() %>%
+  theme_vanilla() %>%
+  set_table_properties(layout = "autofit") %>%
+  autofit()
+```  
+  **Table S8.** Flaking direction among laminar cores across layers A1 and A2, with percentages provided in brackets. Tested raw materials and core shatters are excluded.
+
+<br>
+
+### Table S9
+
+```{r, echo=FALSE, warning=FALSE}
+Dataset_cores %>%
+  dplyr::rename(Classification = "Core.classification") %>%
+  filter(Layer != "A0", Classification != "Shatter" & Classification != "Tested", Laminar == "yes") %>% 
+  tabyl(Layer, Reduction.pattern) %>%
+  adorn_totals("row") %>%
+  adorn_totals("col") %>%
+  adorn_percentages("row") %>%
+  adorn_pct_formatting(digits = 0) %>%
+  adorn_ns(position = "front") %>%
+  flextable() %>%
+  theme_vanilla() %>%
+  set_table_properties(layout = "autofit") %>%
+  autofit()
+```  
+  **Table S9.** Reduction pattern among laminar cores across layers A1 and A2, with percentages provided in brackets. Tested raw materials and core shatters are excluded.
+
+<br>
+
+### Table S10
+
+```{r, echo=FALSE, warning=FALSE}
+Dataset %>%
+  filter(Blank == "Bladelet",
+         Preservation == "Complete" | Preservation == "Proximal",
+         Class == "Blank" | Class == "Tool",
+         Layer != "A0") %>%
+  select(Layer, Platform.type) %>%
+  drop_na() %>%
+  dplyr::rename(`Platform type` = Platform.type) %>%
+  mutate(`Platform type` = fct_relevel(`Platform type`, 
+                                       "Plain", "Linear", "Punctiform", 
+                                       "Cortical", "Undetermined")) %>%  # Reorder platform types
+  tabyl(`Platform type`, Layer) %>%
+  adorn_totals("row") %>%
+  adorn_percentages("col") %>%
+  adorn_pct_formatting(digits = 1) %>%
+  adorn_ns(position = "front") %>%
+  flextable() %>%
+  theme_vanilla() %>%
+  set_table_properties(layout = "autofit") %>%
+  autofit()
+```
+  **Table S10.**  Distribution of platform types among bladelet blanks and tools across layers A1 and A2, with percentages provided in brackets.
+
+<br>
+
+### Table S11
+
+```{r,echo=FALSE, warning=FALSE}
+Dataset %>%
+  filter(Blank == "Bladelet",
+           Preservation == "Complete" | Preservation == "Proximal",
+           Class == "Blank" | Class == "Tool",
+         Layer != "A0") %>%
+  dplyr::rename(`Bulb type` = Bulb.type, `Lip type` = Lip.type) %>%
+  mutate(`Bulb type` = recode(`Bulb type`, Shattered = "Absent")) %>%
+  select(Layer, `Bulb type`, `Lip type`) %>%
+  replace(is.na(.), "Absent") %>%
+  tabyl(Layer, `Bulb type`) %>%
+  adorn_totals("col") %>%
+  adorn_percentages("row") %>%
+  adorn_pct_formatting(digits = 1) %>%
+  adorn_ns(position = "front") %>%
+  flextable() %>%
+  theme_vanilla() %>%
+  set_table_properties(layout = "autofit") %>%
+  autofit()
+```
+  **Table S11.** Distribution of bulb types across layers A1 and A2 for bladelet blanks and tools, with percentages provided in brackets. Shattered bulbs are considered absent.
+
+<br>
+
+### Table S12
+
+```{r, echo=FALSE, warning=FALSE}
+Dataset %>%
+  filter(Blank == "Bladelet",
+           Preservation == "Complete" | Preservation == "Proximal",
+           Class == "Blank" | Class == "Tool",
+         Layer != "A0") %>%
+  dplyr::rename(`Bulb type` = Bulb.type, `Lip type` = Lip.type) %>%
+  mutate(`Bulb type` = recode(`Bulb type`, Shattered = "Absent")) %>%
+  select(Layer, `Bulb type`, `Lip type`) %>%
+  replace(is.na(.), "Absent") %>%
+  tabyl(Layer, `Lip type`) %>%
+  adorn_totals("col") %>%
+  adorn_percentages("row") %>%
+  adorn_pct_formatting(digits = 1) %>%
+  adorn_ns(position = "front") %>%
+  flextable() %>%
+  theme_vanilla() %>%
+  set_table_properties(layout = "autofit") %>%
+  autofit()
+```
+  **Table S12.** Distribution of lip types across layers A1 and A2 for bladelet blanks and tools, with percentages provided in brackets.
+
+<br>
+
+### Table S13
+
+```{r, echo=FALSE, warning=FALSE}
+Dataset %>%
+  filter(Blank == "Bladelet",
+           Preservation == "Complete",
+           Class == "Blank" | Class == "Tool",
+         Layer != "A0") %>%
+  dplyr::rename(`Scar pattern` = Scar.pattern.2) %>%
+  mutate(`Scar pattern` = fct_relevel(`Scar pattern`, "Unidirectional parallel", "Unidirectional convergent", "Bidirectional", "Other")) %>%
+  tabyl(Layer, `Scar pattern`) %>%
+  adorn_totals("col") %>%
+  adorn_percentages("row") %>%
+  adorn_pct_formatting(digits = 1) %>%
+  adorn_ns(position = "front") %>%
+  flextable() %>%
+  theme_vanilla() %>%
+  set_table_properties(layout = "autofit") %>%
+  autofit()
+```
+  **Table S13.** Distribution of scar patterns among bladelet blanks and tools across layers A1 and A2, with percentages provided in brackets.
+
+<br>
+
+### Table S14
+
+```{r, echo=FALSE, warning=FALSE}
+Dataset %>%
+  filter(Blank == "Bladelet",
+           Preservation == "Complete",
+           Class == "Blank" | Class == "Tool",
+         Layer != "A0") %>%
+  tabyl(Layer, Curvature) %>%
+  adorn_totals("col") %>%
+  adorn_percentages("row") %>%
+  adorn_pct_formatting(digits = 1) %>%
+  adorn_ns(position = "front") %>%
+  flextable() %>%
+  theme_vanilla() %>%
+  set_table_properties(layout = "autofit") %>%
+  autofit()
+```
+  **Table S14.** Distribution of profile curvature intensity among bladelet blanks and tools across layers A1 and A2, with percentages provided in brackets.
+
+<br>
+
+### Table S15
+
+```{r, echo=FALSE, warning=FALSE}
+Dataset %>%
+  filter(Blank == "Bladelet",
+           Preservation == "Complete",
+           Class == "Blank" | Class == "Tool",
+         Layer != "A0") %>%
+      mutate(Torsion = case_when(
+    Torsion == "0" ~ "Non-twisted",
+    Torsion %in% c("1L", "1R") ~ "Slightly twisted",
+    Torsion %in% c("2L", "2R") ~ "Twisted"
+  )) %>%
+  tabyl(Layer, Torsion) %>%
+  adorn_totals("col") %>%
+  adorn_percentages("row") %>%
+  adorn_pct_formatting(digits = 1) %>%
+  adorn_ns(position = "front") %>%
+  flextable() %>%
+  theme_vanilla() %>%
+  set_table_properties(layout = "autofit") %>%
+  autofit()
+```
+  **Table S15.** Distribution of profile torsion intensity among bladelet blanks and tools across layers A1 and A2, with percentages provided in brackets.
+
+<br>
+
+### Table S16
+
+```{r, echo=FALSE, warning=FALSE}
+Dataset %>%
+  filter(Blank == "Bladelet",
+           Preservation == "Complete",
+           Class == "Blank" | Class == "Tool",
+         Layer != "A0") %>%
+  dplyr::rename(`Cross-section` = Section) %>%
+  tabyl(Layer, `Cross-section`) %>%
+  adorn_totals("col") %>%
+  adorn_percentages("row") %>%
+  adorn_pct_formatting(digits = 1) %>%
+  adorn_ns(position = "front") %>%
+  flextable() %>%
+  theme_vanilla() %>%
+  set_table_properties(layout = "autofit") %>%
+  autofit()
+```
+  **Table S16.** Distribution of cross-section types among bladelet blanks and tools across layers A1 and A2, with percentages provided in brackets.
+
+```{r, echo=FALSE, warning=FALSE}
+Dataset %>%
+  filter(Blank == "Bladelet",
+           Preservation == "Complete",
+           Class == "Blank" | Class == "Tool",
+         Layer != "A0") %>%
+  dplyr::rename(`Cross-section` = Section) %>%
+  tabyl(Layer, `Cross-section`) %>%
+  fisher.test()
+```
+
+<br>
+
+### Table S17
+
+```{r, echo=FALSE, warning=FALSE}
+Dataset %>%
+  filter(Blank == "Bladelet",
+           Preservation == "Complete",
+           Class == "Blank",
+         Layer != "A0") %>%
+  group_by(Layer) %>%
+  get_summary_stats(Length, Width, Thickness, show = c("mean", "sd", "min", "median", "max")) %>%
+  flextable() %>%
+  theme_vanilla() %>%
+  set_table_properties(layout = "autofit") %>%
+  autofit()
+```
+  **Table S17.** Summary statistics for the length, width, and thickness of bladelet blanks across layers A1 and A2. sd = standard deviation.
+
+<br>
+
+### Table S18
+
+```{r, echo=FALSE, warning=FALSE}
+# Load the saved Rdata file
+load("../data/correlation_results_table.Rdata")
+
+# Modify the column names if needed
+colnames(correlation_results) <- c("Measurement", "Principal Component", "Spearman", "p-value")
+
+# Create a flextable
+correlation_results %>%
+  flextable() %>%
+  theme_vanilla() %>%
+  set_table_properties(layout = "autofit") %>%
+  autofit()
+```  
+  **Table S18.**  Results of the Spearman tests on the correlation between size (length, width, and thickness) and the first three principal components (PC1, PC2, and PC3) of the bladelet outline analysis. CORRECT
+
+<br>
+
+### Table S19
+
+```{r, echo=FALSE, warning=FALSE}
+# Summarize data for "Retouched bladelet"
+table.cortex.1 <- Dataset %>%
+  filter(Class == "Core-Tool" | Class == "Tool", Layer != "A0", Blank == "Bladelet") %>%
+  tabyl(Layer, Cortex) %>%
+  adorn_totals("col") %>%
+  adorn_percentages("row") %>%
+  adorn_pct_formatting(digits = 1) %>%
+  adorn_ns(position = "front") %>%
+  mutate(Blank = "Bladelet")
+
+# Summarize data for "Blade"
+table.cortex.2 <- Dataset %>%
+  filter(Class == "Core-Tool" | Class == "Tool", Layer != "A0", Blank == "Blade") %>%
+  tabyl(Layer, Cortex) %>%
+  adorn_totals("col") %>%
+  adorn_percentages("row") %>%
+  adorn_pct_formatting(digits = 1) %>%
+  adorn_ns(position = "front") %>%
+  mutate(Blank = "Blade")
+
+# Summarize data for "Flake"
+table.cortex.3 <- Dataset %>%
+  filter(Class == "Core-Tool" | Class == "Tool", Layer != "A0", Blank == "Flake") %>%
+  tabyl(Layer, Cortex) %>%
+  adorn_totals("col") %>%
+  adorn_percentages("row") %>%
+  adorn_pct_formatting(digits = 1) %>%
+  adorn_ns(position = "front") %>%
+  mutate(Blank = "Flake")
+
+# Combine the summarized data frames
+combined_table.cortex <- bind_rows(table.cortex.1, table.cortex.2, table.cortex.3)
+
+# Rearrange the columns to move the last column (Blank) to the second position
+combined_table.cortex <- combined_table.cortex %>%
+  select(Layer, Blank, everything())  # This puts the 'Blank' column second
+
+# Display the combined table
+combined_table.cortex %>%
+  flextable() %>%
+  theme_vanilla() %>%
+  set_table_properties(layout = "autofit") %>%
+  autofit()
+```
+  **Table S19.** Distribution of cortex coverage across layers A2 and A1 for bladelet, blade, and flake tools, with percentages provided in brackets.
+
+<br>
+
+### Table S20
+
+```{r, echo=FALSE, warning=FALSE}
+Dataset %>%
+  filter(Layer == "A0", Class != "Pebble") %>%
+  dplyr::rename(`Raw material` = raw.material.lumped) %>%
+  mutate(`Raw material` = recode(`Raw material`, 
+                                 "Circum.local" = "Circum-local", 
+                                 "Very.distant" = "Very distant")) %>%  # Rename Circum.local and Very.distant
+  mutate(`Raw material` = fct_relevel(`Raw material`, 
+                                      "Local", 
+                                      "Circum-local", 
+                                      "Distant", 
+                                      "Very distant", 
+                                      "Undetermined")) %>%  # Reorder raw materials
+  tabyl(`Raw material`, Layer) %>%
+  adorn_percentages("col") %>%
+  adorn_pct_formatting(digits = 1) %>%
+  adorn_ns(position = "front") %>%
+  flextable() %>%
+  theme_vanilla() %>%
+  set_table_properties(layout = "autofit") %>%
+  autofit()
+```
+  **Table S20.** Distribution of raw material provenance in Layer A0, with percentages provided in brackets.
+
+<br>
+
+### Table S21
+
+```{r, echo=FALSE, warning=FALSE}
+Dataset_cores %>%
+  mutate(raw.material.lumped = recode(raw.material.lumped, `Local` = "Local", `Circum.local` = "Circum-local", `Distant` = "Distant", `Very.distant` = "Very distant", `Undetermined` = "Undetermined")) %>%
+  dplyr::rename(Classification = "Core.classification") %>%
+  # mutate(raw.material.lumped = fct_relevel(raw.material.lumped, "Local", "Circum-local", "Distant")) %>%  arrange(Classification) %>%
+  filter(Layer == "A0") %>%
+  mutate(Classification = recode(Classification, `Initial laminar` = "Initial", `Shatter laminar` = "Shatter")) %>%
+  mutate(Classification = fct_relevel(Classification, "Initial flake", "Bipolar", "Carinated", "Shatter")) %>%  arrange(Classification) %>% 
+  tabyl(Classification, raw.material.lumped) %>%
+  adorn_totals("row") %>%
+  adorn_totals("col") %>%
+  flextable() %>%
+  theme_vanilla() %>%
+  set_table_properties(layout = "autofit") %>%
+  autofit()
+```
+  **Table S21.** Core classification for layer A0 and distribution of raw material provenance.
+
+<br>
+
+### Table S22
+
+```{r, echo=FALSE, warning=FALSE}
+Dataset %>%
+  filter(Blank == "Bladelet",
+           Preservation == "Complete",
+           Class == "Blank",
+         Layer == "A0") %>%
+  # group_by(Layer) %>%
+  get_summary_stats(Length, Width, Thickness, show = c("mean", "sd", "min", "median", "max")) %>%
+  flextable() %>%
+  theme_vanilla() %>%
+  set_table_properties(layout = "autofit") %>%
+  autofit()
+```
+  **Table S22.** Summary statistics for the length, width, and thickness of bladelet blanks in layer A0. sd = standard deviation.
+
+<br>
+
+### Table S23
+
+```{r, echo=FALSE, warning=FALSE}
+Dataset %>%
+  dplyr::rename(Type = Typology.new) %>%
+  mutate(raw.material.lumped = recode(raw.material.lumped, `Local` = "Local", `Circum.local` = "Circum-local", `Distant` = "Distant", `Very.distant` = "Very distant", `Undetermined` = "Undetermined", not.available = "Undetermined")) %>%
+    mutate(raw.material.lumped = fct_relevel(raw.material.lumped, 
+                                      "Local", 
+                                      "Circum-local", 
+                                      "Distant", 
+                                      "Very distant", 
+                                      "Undetermined")) %>%
+  filter(Class == "Core-Tool" | Class == "Tool", Layer == "A0") %>%
+  tabyl(Type, raw.material.lumped) %>%
+  adorn_totals("col") %>%
+  adorn_totals("row") %>%
+  flextable() %>%
+  theme_vanilla() %>%
+  set_table_properties(layout = "autofit") %>%
+  autofit()
+```
+  **Table S23.** Classification of tool types from layer A0.

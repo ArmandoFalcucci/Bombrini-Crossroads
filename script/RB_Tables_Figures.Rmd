@@ -1,0 +1,847 @@
+---
+title: "Tables_Figures_Paper"
+author: "Armando Falcucci"
+date: "2024-07-25"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r include=FALSE}
+## packages used
+library(readxl)
+library(knitr)
+library(kableExtra)
+library(dplyr)
+library(tidyr)
+library(janitor)
+library(forcats)
+library(rstatix)
+library(tidyverse)
+library(MetBrewer)
+library(plyr)
+library(forcats)
+library(scales)
+library(cowplot)
+library(ggpubr)
+library(xtable)
+library(flextable)
+
+Dataset <- read.csv("../data/RB_dataset.csv")
+Dataset_cores <- read.csv("../data/RB_dataset_cores.csv")
+# 
+comparison.A2.A1 <- list(c("A2", "A1"))
+
+# Set A4 dimensions in inches (8.27 x 11.69 inches)
+a4_width <- 8.27
+a4_height <- 11.69
+
+# IMPORTANTE ADD TO REST OF THE CODE
+# Dataset <- Dataset %>%
+#   mutate(raw.material.lumped = fct_relevel(raw.material.lumped, "Local", "Circum-local", "Distant", "Very-distant"))
+
+
+custom.palette.rawMat <- c(
+  "Local" = "#8DD3C7",
+  "Circum-local" = "#FFFFB3",
+  "Distant" = "#BEBADA",
+  "Very distant" = "#FB8072"
+)
+
+zapotec_palette <- c(
+  "Local" = "#D14A34",        # Bold red
+  "Circum-local" = "#C09B29", # Rich blue
+  "Distant" = "#3D6F9E",      # Earthy orange
+  "Very distant" = "#F1A64C"# Golden yellow
+)
+
+A1_A2_palette <- c(
+  "A1" = "#6F9E58",   # Calming green for A1
+  "A2" = "#8A3E28"    # Deep red for A2
+)
+
+Local_NonLocal_palette <- c(
+  "Local" = "#C75C4A",   # Warm terracotta red for Local (Adobe color)
+  "Non-local" = "#A58D65" # Muted sandy beige for Non-local (Desert earth tone)
+)
+
+```
+
+## Tables
+
+### Table 1
+
+```{r}
+# Step 1: Create the data frame with raw counts
+data.conjoins <- data.frame(
+  Layer = c("A1", "A1-A2", "A2", "Total"),
+  Proximal_n = c(287, 12, 354, 653),
+  Proximal_pct = c(0, 0, 0, 0),  # Placeholder for percentages
+  Mesial_n = c(200, 4, 249, 453),
+  Mesial_pct = c(0, 0, 0, 0),    # Placeholder for percentages
+  Distal_n = c(200, 6, 204, 410),
+  Distal_pct = c(0, 0, 0, 0),    # Placeholder for percentages
+  Total_n = c(687, 22, 807, 1516)
+)
+
+# Step 2: Calculate percentages for each layer
+data.conjoins <- data.conjoins %>%
+  mutate(
+    Proximal_pct = round((Proximal_n / Total_n) * 100, 1),
+    Mesial_pct = round((Mesial_n / Total_n) * 100, 1),
+    Distal_pct = round((Distal_n / Total_n) * 100, 1)
+  )
+
+# Step 3: Create the final table
+Table_1 <- data.conjoins %>%
+  select(Layer, Proximal_n, Proximal_pct, Mesial_n, Mesial_pct, Distal_n, Distal_pct, Total_n) %>%
+  dplyr::rename(
+    `Proximal, n` = Proximal_n,
+    `Proximal, %` = Proximal_pct,
+    `Mesial, n` = Mesial_n,
+    `Mesial, %` = Mesial_pct,
+    `Distal, n` = Distal_n,
+    `Distal, %` = Distal_pct,
+    `Total, n` = Total_n
+  )
+
+# Step 4: Display the table
+Table_1 %>%
+  flextable() %>%
+  theme_vanilla() %>%
+  set_table_properties(layout = "autofit") %>%
+  autofit()
+  # kbl(align = "lcccrcccr") %>%
+  # kable_classic_2(full_width = FALSE)
+```
+  *Table 1.*
+
+### Table 2
+
+```{r, echo=FALSE, warning=FALSE}
+tabyl(Dataset, Layer, Class) %>%
+  adorn_totals("col") %>%
+  adorn_totals("row") %>%
+  adorn_percentages("row") %>%
+  adorn_pct_formatting(digits = 1) %>%
+  adorn_ns(position = "front") %>%
+  flextable() %>%
+  theme_vanilla() %>%
+  set_table_properties(layout = "autofit") %>%
+  autofit()
+```
+
+### Table 3
+
+
+```{r, echo=FALSE, warning=FALSE}
+Dataset %>%
+  filter(Class != "Pebble") %>%
+  # rename(`Raw material` = Raw_material) %>%
+  mutate(raw.material.type.new = recode(raw.material.type.new, Unknown = "Undetermined"),
+         raw.material.type.new = fct_infreq(raw.material.type.new)) %>%
+  tabyl(raw.material.type.new, Layer) %>%
+  adorn_totals("col") %>%
+  adorn_percentages("col") %>%
+  adorn_pct_formatting(digits = 1) %>%
+  adorn_ns(position = "front") %>%
+  adorn_title(placement = "top") %>%
+  kbl(align = "lccc") %>%
+  row_spec(1, bold = T, hline_after = F) %>%
+  kable_classic_2(lightable_options = "striped", full_width = F)
+```
+  **Table 3.**
+
+### Raw material collection - Est vs. West
+
+```{r, echo=FALSE, warning=FALSE, include=TRUE}
+Dataset %>%
+  filter(Class != "Pebble", raw.material.source != "Undetermined" & raw.material.source != "not.available", Layer != "A0") %>%
+  tabyl(raw.material.provenience, Layer) %>%
+  adorn_totals("col") %>%
+  adorn_totals("row") %>%
+  adorn_percentages("col") %>%
+  adorn_pct_formatting(digits = 1) %>%
+  adorn_ns(position = "front") %>%
+  adorn_title(placement = "top") %>%
+  kbl(align = "lccc") %>%
+  row_spec(1, bold = T, hline_after = F) %>%
+  kable_classic_2(lightable_options = "striped", full_width = F)
+```
+
+### Table 3
+
+```{r, echo=FALSE, warning=FALSE}
+library(dplyr)
+library(forcats)
+library(janitor)
+library(knitr)
+library(kableExtra)
+
+Dataset_cores %>%
+  dplyr::rename(Classification = "Core.classification") %>%
+  filter(Layer != "A0") %>%
+  mutate(Classification = recode(Classification, `Initial laminar` = "Initial", `Shatter laminar` = "Shatter")) %>%
+  mutate(Classification = fct_relevel(Classification, 
+                                      "Initial", "Bipolar", "Burin core", "Carinated", "Multi-platform", 
+                                      "Narrow-sided", "Semi-circumferential", "Wide-faced flat", 
+                                      "Multidirectional", "Platform flake", "Shatter", "Tested")) %>%
+  tabyl(Classification, Layer) %>%
+  adorn_totals("row") %>%
+  adorn_totals("col") %>%
+  adorn_percentages("col") %>%
+  adorn_pct_formatting(digits = 0) %>%
+  adorn_ns(position = "front") %>%
+  adorn_title(placement = "top") %>%
+  kbl(align = "lccccccccr") %>%
+  kable_classic_2(lightable_options = "striped", full_width = F)
+
+
+
+
+
+
+Dataset_cores %>%
+  dplyr::rename(Classification = "Core.classification") %>%
+  filter(Layer != "A0") %>%
+  mutate(Classification = recode(Classification, `Initial laminar` = "Initial", `Shatter laminar` = "Shatter")) %>%
+  # mutate(Classification = fct_relevel(Classification, "Initial", "Burin", "Carinated", "Narrow-sided", "Semi-circumferential", "Wide-faced flat", "Multi-platform", "Shatter")) %>%  arrange(Classification) %>% 
+  tabyl(Classification, Layer) %>%
+  adorn_totals("row") %>%
+  adorn_totals("col") %>%
+  adorn_percentages("col") %>%
+  adorn_pct_formatting(digits = 0) %>%
+  adorn_ns(position = "front") %>%
+  adorn_title(placement = "top") %>%
+  kbl(align = "lccccccccr") %>%
+  kable_classic_2(lightable_options = "striped", full_width = F)
+```
+
+### Table 5
+
+```{r, echo=FALSE, warning=FALSE}
+Dataset_cores %>%
+  dplyr::rename(Classification = "Core.classification") %>%
+  mutate(Blank.production = recode(Blank.production, `Blade;Bladelet` = "Bladelet-Blade")) %>%
+  mutate(Blank.production = fct_relevel(Blank.production, "Bladelet", "Bladelet-Blade", "Bladelet-Flake", "Flake", "Undetermined")) %>%
+  filter(Layer != "A0") %>% 
+  tabyl(Layer, Blank.production) %>%
+  adorn_totals("row") %>%
+  adorn_totals("col") %>%
+  adorn_percentages("row") %>%
+  adorn_pct_formatting(digits = 0) %>%
+  adorn_ns(position = "front") %>%
+  adorn_title(placement = "top") %>%
+  kbl(align = "lccccccccr") %>%
+  kable_classic_2(lightable_options = "striped", full_width = F)
+```
+  **Table 5.**
+
+### Table 6
+
+```{r, echo=FALSE, warning=FALSE}
+Dataset %>%
+  filter(Class == "Core-Tool" | Class == "Tool", Layer != "A0") %>%
+  mutate(
+    Typology.new = recode(Typology.new, 
+                          "Endscraper" = "Endscraper simple",
+                          "Burin" = "Burin simple",
+                          "Flake retouched" = "Retouched flake")
+  ) %>%
+  tabyl(Typology.new, Layer) %>%
+  adorn_totals("col") %>%
+  adorn_totals("row") %>%
+  adorn_percentages("col") %>%
+  adorn_pct_formatting(digits = 1) %>%
+  adorn_ns(position = "front") %>%
+  adorn_title(placement = "top") %>%
+  kbl(align = "lccccr") %>%
+  kable_classic(full_width = F)
+```
+  *Table 5.*
+
+```{r, echo=FALSE, warning=FALSE}
+Dataset %>%
+  filter(Class == "Core-Tool" | Class == "Tool", Layer != "A0") %>%
+  tabyl(Typology.new, Layer) %>%
+  chisq.test()
+```
+
+### Table 6
+
+```{r, echo=FALSE, warning=FALSE}
+Dataset %>%
+  filter(Class == "Core-Tool" | Class == "Tool", Layer != "A0", Typology.new == "Retouched bladelet") %>%
+  tabyl(Retouch.position, Layer) %>%
+  adorn_totals("col") %>%
+  adorn_totals("row") %>%
+  adorn_percentages("col") %>%
+  adorn_pct_formatting(digits = 1) %>%
+  adorn_ns(position = "front") %>%
+  flextable() %>%
+  theme_vanilla() %>%
+  set_table_properties(layout = "autofit") %>%
+  autofit()
+```
+  *Table 6.*
+
+
+```{r, echo=FALSE, warning=FALSE}
+Dataset %>%
+  filter(Class == "Core-Tool" | Class == "Tool", Layer != "A0", Typology.new == "Retouched bladelet") %>%
+  tabyl(Retouch.position, Layer) %>%
+  chisq.test()
+```
+
+<br>
+
+## Figures
+
+### Figure 3
+```{r}
+Fig3a <- Dataset %>%
+  mutate(Class = recode(Class, `Core-Tool` = "Core")) %>%
+  filter(Class %in% c("Blank", "Tool"), Layer != "A0", Class == "Tool", raw.material.lumped != "not.available" & raw.material.lumped != "Undetermined", Typology.new == "Retouched bladelet") %>%
+  mutate(raw.material.lumped = recode(raw.material.lumped, Circum.local = "Circum-local", Very.distant = "Very distant")) %>%
+  mutate(raw.material.lumped = fct_relevel(raw.material.lumped, "Local", "Circum-local", "Distant", "Very distant")) %>%
+  droplevels() %>%  # Drop unused factor levels
+  ggstatsplot::ggbarstats(
+    x = raw.material.lumped,  
+    y = Layer,
+    palette = "Set2",
+    results.subtitle = F) +
+  scale_fill_manual(values = zapotec_palette) +
+  theme_minimal() +
+  labs(subtitle = "a") +
+  theme(
+    plot.title = element_text(size = 16, face = "bold"),
+    axis.title = element_text(size = 14),
+    axis.text = element_text(size = 12),
+    strip.text = element_text(size = 14),
+    legend.position = "none",
+    legend.title = element_text(size = 14),
+    legend.text = element_text(size = 12),
+    plot.subtitle = element_text(hjust = 0, vjust = -0.5, size = 16, face = "bold")) +
+  guides(fill=guide_legend(title="Provenience"))
+
+Fig3b <- Dataset %>%
+  mutate(Class = recode(Class, `Core-Tool` = "Core")) %>%
+  filter(Class %in% c("Blank", "Tool"), Layer != "A0", Class == "Tool", raw.material.lumped != "not.available" & raw.material.lumped != "Undetermined", Typology.new != "Retouched bladelet") %>%
+  mutate(raw.material.lumped = recode(raw.material.lumped, Circum.local = "Circum-local", Very.distant = "Very distant")) %>%
+  mutate(raw.material.lumped = fct_relevel(raw.material.lumped, "Local", "Circum-local", "Distant", "Very distant")) %>%
+  droplevels() %>%  # Drop unused factor levels
+  ggstatsplot::ggbarstats(
+    x = raw.material.lumped,  
+    y = Layer,
+    palette = "Set2",
+    results.subtitle = F) +
+  scale_fill_manual(values = zapotec_palette) +
+  theme_minimal() +
+  labs(subtitle = "b") +
+  theme(
+    plot.title = element_text(size = 16, face = "bold"),
+    axis.title = element_text(size = 14),
+    axis.text = element_text(size = 12),
+    strip.text = element_text(size = 14),
+    legend.position = "none",
+    legend.title = element_text(size = 14),
+    legend.text = element_text(size = 12),
+    plot.subtitle = element_text(hjust = 0, vjust = -0.5, size = 16, face = "bold")) +
+  guides(fill=guide_legend(title="Provenience"))
+
+
+Fig3c <- Dataset %>%
+  mutate(Class = recode(Class, `Core-Tool` = "Core")) %>%
+  filter(Class %in% c("Blank", "Tool"), Layer != "A0", Class == "Blank", raw.material.lumped != "not.available" & raw.material.lumped != "Undetermined", Blank == "Bladelet") %>%
+  mutate(raw.material.lumped = recode(raw.material.lumped, Circum.local = "Circum-local", Very.distant = "Very distant")) %>%
+  mutate(raw.material.lumped = fct_relevel(raw.material.lumped, "Local", "Circum-local", "Distant", "Very distant")) %>%
+  droplevels() %>%  # Drop unused factor levels
+  ggstatsplot::ggbarstats(
+    x = raw.material.lumped,  
+    y = Layer,
+    palette = "Set2",
+    results.subtitle = F) +
+  scale_fill_manual(values = zapotec_palette) +
+  theme_minimal() +
+  labs(subtitle = "c") +
+  theme(
+    plot.title = element_text(size = 16, face = "bold"),
+    axis.title = element_text(size = 14),
+    axis.text = element_text(size = 12),
+    strip.text = element_text(size = 14),
+    legend.position = "none",
+    legend.title = element_text(size = 14),
+    legend.text = element_text(size = 12),
+    plot.subtitle = element_text(hjust = 0, vjust = -0.5, size = 16, face = "bold")) +
+  guides(fill=guide_legend(title="Provenience"))
+
+
+Fig3d <- Dataset %>%
+  mutate(Class = recode(Class, `Core-Tool` = "Core")) %>%
+  filter(Class %in% c("Blank", "Tool"), Layer != "A0", Class == "Blank", raw.material.lumped != "not.available" & raw.material.lumped != "Undetermined", Blank != "Bladelet") %>%
+  mutate(raw.material.lumped = recode(raw.material.lumped, Circum.local = "Circum-local", Very.distant = "Very distant")) %>%
+  mutate(raw.material.lumped = fct_relevel(raw.material.lumped, "Local", "Circum-local", "Distant", "Very distant")) %>%
+  droplevels() %>%  # Drop unused factor levels
+  ggstatsplot::ggbarstats(
+    x = raw.material.lumped,  
+    y = Layer,
+    palette = "Set2",
+    results.subtitle = F) +
+  scale_fill_manual(values = zapotec_palette) +
+  theme_minimal() +
+  labs(subtitle = "d") +
+  theme(
+    plot.title = element_text(size = 16, face = "bold"),
+    axis.title = element_text(size = 14),
+    axis.text = element_text(size = 12),
+    strip.text = element_text(size = 14),
+    legend.position = "none",
+    legend.title = element_text(size = 14),
+    legend.text = element_text(size = 12),
+    plot.subtitle = element_text(hjust = 0, vjust = -0.5, size = 16, face = "bold")) +
+  guides(fill=guide_legend(title="Provenience"))
+
+Fig3e <- Dataset_cores %>%
+  filter(raw.material.lumped != "not.available" & raw.material.lumped != "Undetermined", Laminar == "yes", Layer != "A0") %>%
+  mutate(raw.material.lumped = recode(raw.material.lumped, Circum.local = "Circum-local", Very.distant = "Very distant")) %>%
+  mutate(raw.material.lumped = fct_relevel(raw.material.lumped, "Local", "Circum-local", "Distant", "Very distant")) %>%
+  droplevels() %>%  # Drop unused factor levels
+  ggstatsplot::ggbarstats(
+    x = raw.material.lumped,  
+    y = Layer,
+    palette = "Set2",
+    results.subtitle = F) +
+  scale_fill_manual(values = zapotec_palette) +
+  theme_minimal() +
+  labs(subtitle = "e") +
+  theme(
+    plot.title = element_text(size = 16, face = "bold"),
+    axis.title = element_text(size = 14),
+    axis.text = element_text(size = 12),
+    strip.text = element_text(size = 14),
+    legend.position = "none",
+    legend.title = element_text(size = 14),
+    legend.text = element_text(size = 12),
+    plot.subtitle = element_text(hjust = 0, vjust = -0.5, size = 16, face = "bold")) +
+  guides(fill=guide_legend(title="Provenience"))
+
+
+Fig3f <- Dataset_cores %>%
+  filter(raw.material.lumped != "not.available" & raw.material.lumped != "Undetermined", Laminar == "no", Layer != "A0") %>%
+  mutate(raw.material.lumped = recode(raw.material.lumped, Circum.local = "Circum-local", Very.distant = "Very distant")) %>%
+  mutate(raw.material.lumped = fct_relevel(raw.material.lumped, "Local", "Circum-local", "Distant", "Very distant")) %>%
+  droplevels() %>%  # Drop unused factor levels
+  ggstatsplot::ggbarstats(
+    x = raw.material.lumped,  
+    y = Layer,
+    palette = "Set2",
+    results.subtitle = F) +
+  scale_fill_manual(values = zapotec_palette) +
+  theme_minimal() +
+  labs(subtitle = "f") +
+  theme(
+    plot.title = element_text(size = 16, face = "bold"),
+    axis.title = element_text(size = 14),
+    axis.text = element_text(size = 12),
+    strip.text = element_text(size = 14),
+    legend.position = "none",
+    legend.title = element_text(size = 14),
+    legend.text = element_text(size = 12),
+    plot.subtitle = element_text(hjust = 0, vjust = -0.5, size = 16, face = "bold")) +
+  guides(fill=guide_legend(title="Provenience"))
+
+
+Figure_3 <- (Fig3a | Fig3b) /
+  (Fig3c | Fig3d) /
+  (Fig3e | Fig3f) + 
+  patchwork::plot_layout(guides = "collect") & 
+  theme(legend.position = "bottom")
+
+Figure_3
+
+# Save the plot as a high-resolution TIFF file
+# ggsave("../output/combined_plot.tiff", plot = Figure_3, width = a4_width, height = a4_height, units = "in", dpi = 300)
+# 
+# # Save the plot as a PDF file
+ggsave("../output/combined_plot.pdf", plot = Figure_3, width = a4_width, height = a4_height, units = "in") # made in pdf and then double legend removed in Illustrator
+```
+  **Figure 3.**
+
+
+### Figure raw mat size
+```{r, echo=FALSE, warning=FALSE, fig.align='center'}
+# Length plot
+bladelet.A1.length.raw.mat <- Dataset %>%
+  filter(Blank == "Bladelet",
+         Preservation == "Complete",
+         Class == "Blank",
+         Layer == "A1",
+         raw.material.lumped != "Undetermined" & raw.material.lumped != "not.available") %>%
+  mutate(Provenance = case_when(
+    raw.material.lumped == "Local" ~ "Local",
+    raw.material.lumped %in% c("Circum.local", "Distant", "Very.distant") ~ "Non-local"
+  )) %>%
+  group_by(Layer) %>%
+  ggplot(aes(x = Provenance, y = Length)) +
+  geom_boxplot(aes(fill = Provenance)) +
+  stat_compare_means(comparison = comparison.A2.A1) +
+  stat_compare_means(label.y = 50) +
+  geom_jitter(shape = 16, position = position_jitter(width = 0.2), alpha = 0.2, size = 0.7) +
+  ggthemes::theme_clean() +
+  scale_fill_manual(values = Local_NonLocal_palette) +  # Use the custom palette here
+  theme(
+    text = element_text(size = 16),
+    axis.text = element_text(size = 14),
+    axis.title = element_text(size = 16),
+    panel.background = element_blank(),
+    panel.grid = element_blank(),
+    panel.border = element_blank(),
+    legend.position = "none"
+  ) +
+  labs(y = "Length (mm)")
+
+# Width plot
+bladelet.A1.width.raw.mat <- Dataset %>%
+  filter(Blank == "Bladelet",
+         Preservation == "Complete",
+         Class == "Blank",
+         Layer == "A1",
+         raw.material.lumped != "Undetermined" & raw.material.lumped != "not.available") %>%
+  mutate(Provenance = case_when(
+    raw.material.lumped == "Local" ~ "Local",
+    raw.material.lumped %in% c("Circum.local", "Distant", "Very.distant") ~ "Non-local"
+  )) %>%
+  group_by(Layer) %>%
+  ggplot(aes(x = Provenance, y = Width)) +
+  geom_boxplot(aes(fill = Provenance)) +
+  stat_compare_means(comparison = comparison.A2.A1) +
+  stat_compare_means(label.y = 13) +
+  geom_jitter(shape = 16, position = position_jitter(width = 0.2), alpha = 0.2, size = 0.7) +
+  ggthemes::theme_clean() +
+  scale_fill_manual(values = Local_NonLocal_palette) +  # Use the custom palette here
+  theme(
+    text = element_text(size = 16),
+    axis.text = element_text(size = 14),
+    axis.title = element_text(size = 16),
+    panel.background = element_blank(),
+    panel.grid = element_blank(),
+    panel.border = element_blank(),
+    legend.position = "none"
+  ) +
+  labs(y = "Width (mm)")
+
+# Thickness plot
+bladelet.A1.thickness.raw.mat <- Dataset %>%
+  filter(Blank == "Bladelet",
+         Preservation == "Complete",
+         Class == "Blank",
+         Layer == "A1",
+         raw.material.lumped != "Undetermined" & raw.material.lumped != "not.available") %>%
+  mutate(Provenance = case_when(
+    raw.material.lumped == "Local" ~ "Local",
+    raw.material.lumped %in% c("Circum.local", "Distant", "Very.distant") ~ "Non-local"
+  )) %>%
+  group_by(Layer) %>%
+  ggplot(aes(x = Provenance, y = Thickness)) +
+  geom_boxplot(aes(fill = Provenance)) +
+  stat_compare_means(comparison = comparison.A2.A1) +
+  stat_compare_means(label.y = 9) +
+  geom_jitter(shape = 16, position = position_jitter(width = 0.2), alpha = 0.2, size = 0.7) +
+  ggthemes::theme_clean() +
+  scale_fill_manual(values = Local_NonLocal_palette) +  # Use the custom palette here
+  theme(
+    text = element_text(size = 16),
+    axis.text = element_text(size = 14),
+    axis.title = element_text(size = 16),
+    panel.background = element_blank(),
+    panel.grid = element_blank(),
+    panel.border = element_blank(),
+    legend.position = "none"
+  ) +
+  labs(y = "Thickness (mm)")
+
+# Arrange the plots in a single figure
+Figure_6 <- ggarrange(bladelet.A1.length.raw.mat, bladelet.A1.width.raw.mat, bladelet.A1.thickness.raw.mat,
+                      labels = c("a", "b", "c"), nrow = 1,
+                      common.legend = TRUE,
+                      legend = "bottom")
+
+# Display the figure
+Figure_6
+
+# Save the plot as a high-resolution TIFF file
+ggsave("../output/Figure_6.tiff", plot = Figure_6, width = 11.69, height = 4.13, units = "in", dpi = 300)
+```
+  *Figure 6.*
+
+### Figure Sdi
+
+```{r}
+# Plot A - SDI by Distance (Zapotec Palette)
+plot_SDI_distance <- Dataset_cores %>%
+  filter(Layer != "A0", Core.type != "Shatter", raw.material.lumped != "Undetermined") %>%
+  mutate(raw.material.lumped = fct_relevel(raw.material.lumped, "Local", "Circum.local", "Distant", "Very.distant")) %>%
+  mutate(raw.material.lumped = recode(raw.material.lumped, Circum.local = "Circum-local", Very.distant = "Very distant")) %>%
+  ggplot(aes(x = raw.material.lumped, y = logSDI)) +
+  geom_boxplot(aes(fill = raw.material.lumped)) +  # Use the Zapotec palette
+  geom_jitter(shape = 16, position = position_jitter(width = 0.2), alpha = 0.5) +
+  ggthemes::theme_clean() +
+  scale_fill_manual(values = zapotec_palette) +  # Zapotec colors for SDI by Distance
+  theme(
+    text = element_text(size = 20),  # Increased general text size
+    axis.text = element_text(size = 16),  # Increased axis text size
+    axis.title = element_text(size = 18),  # Increased axis title size
+    legend.position = "none"
+  ) +
+  labs(x = "Layer", y = "logSDI")
+
+
+# Plot B - SDI vs Volume with Layer color (A1/A2 Palette for "Layer" colors)
+plot_SDI_scatter <- Dataset_cores %>%
+  filter(Layer != "A0", Core.type != "Shatter") %>%
+  ggplot(aes(x = log10(Volume), y = logSDI, color = Layer)) +
+  geom_point(alpha = 0.9, size = 3.2) +
+  ggthemes::theme_clean() +
+  theme(
+    text = element_text(size = 20),  # Increased general text size
+    axis.text = element_text(size = 16),  # Increased axis text size
+    axis.title = element_text(size = 18),  # Increased axis title size
+    legend.position = "bottom"
+  ) +
+  labs(x = "logVolume", y = "logSDI", color = "Layer") +
+  scale_color_manual(values = A1_A2_palette)  # A1/A2 palette for Layer color
+
+# Add Bipolar cores with distinct shape
+bipolar_cores <- Dataset_cores %>%
+  filter(Core.classification == "Bipolar", Layer != "A0", Core.type != "Shatter")
+
+plot_SDI_scatter <- plot_SDI_scatter + 
+  ggrepel::geom_label_repel(data = bipolar_cores, 
+                            aes(x = log10(Volume), y = logSDI, label = "Bipolar"), 
+                            size = 3, color = "black", fill = "white", 
+                            box.padding = 0.5, point.padding = 0.5) +
+  geom_point(data = bipolar_cores, 
+             aes(x = log10(Volume), y = logSDI), 
+             shape = 21, fill = "orange", size = 5, stroke = 1.5, color = "black") 
+
+plot_SDI_A2_A1 <- Dataset_cores %>%
+  filter(Layer != "A0", Core.type != "Shatter") %>%
+  ggplot(aes(x = Layer, y = logSDI)) +
+  geom_boxplot(aes(fill = Layer)) +  # Use the A1/A2 palette
+  stat_compare_means(comparison = comparison.A2.A1) +
+  geom_jitter(shape = 16, position = position_jitter(width = 0.2), alpha = 0.5) +
+  ggthemes::theme_clean() +
+  scale_fill_manual(values = A1_A2_palette) +  # A1/A2 colors for this plot
+  theme(
+    text = element_text(size = 20),  # Increased general text size
+    axis.text = element_text(size = 16),  # Increased axis text size
+    axis.title = element_text(size = 18),  # Increased axis title size
+    legend.position = "none"
+  ) +
+  labs(x = "Layer", y = "logSDI")
+
+# Plot D - SDI by Layer and raw.material.lumped (Adobe-inspired colors)
+plot_SDI_boxplot_rawmat <- Dataset_cores %>%
+  filter(Layer != "A0", Core.type != "Shatter", raw.material.lumped != "Undetermined") %>%
+  mutate(raw.material.lumped = case_when(
+    raw.material.lumped == "Local" ~ "Local",
+    raw.material.lumped %in% c("Circum.local", "Distant", "Very.distant") ~ "Non-local"
+  )) %>%
+  ggplot(aes(x = Layer, y = logSDI)) +
+  geom_boxplot(aes(fill = Layer)) +  # Color by Layer (A1, A2)
+  stat_compare_means(comparison = comparison.A2.A1) +
+  geom_jitter(shape = 16, position = position_jitter(width = 0.2), alpha = 0.5) +
+  ggthemes::theme_clean() +
+  scale_fill_manual(values = A1_A2_palette) +  # Use the Layer palette
+  theme(
+    text = element_text(size = 20),  # Increased general text size
+    axis.text = element_text(size = 16),  # Increased axis text size
+    axis.title = element_text(size = 18),  # Increased axis title size
+    legend.position = "none"
+  ) +
+  labs(x = "Layer", y = "logSDI") +
+  facet_wrap(~ raw.material.lumped)
+
+
+# Combine all four plots into a single figure
+Figure_7 <- ggarrange(plot_SDI_distance, plot_SDI_scatter, plot_SDI_A2_A1, plot_SDI_boxplot_rawmat,
+                      labels = c("a", "b", "c", "d"),
+                      ncol = 2, nrow = 2, 
+                      common.legend = FALSE,
+                       font.label = list(size = 18))
+
+# Save the plot as a high-resolution TIFF file
+ggsave("../output/Figure_7.tiff", plot = Figure_7, width = 11.69, height = 8.27, units = "in", dpi = 300)
+
+# # Plot A - SDI by Distance (Zapotec Palette)
+# plot_SDI_distance <- Dataset_cores %>%
+#   filter(Layer != "A0", Core.type != "Shatter", raw.material.lumped != "Undetermined") %>%
+#   mutate(raw.material.lumped = fct_relevel(raw.material.lumped, "Local", "Circum.local", "Distant", "Very.distant")) %>%
+#   mutate(raw.material.lumped = recode(raw.material.lumped, Circum.local = "Circum-local", Very.distant = "Very distant")) %>%
+#   ggplot(aes(x = raw.material.lumped, y = logSDI)) +
+#   geom_boxplot(aes(fill = raw.material.lumped)) +  # Use the Zapotec palette
+#   geom_jitter(shape = 16, position = position_jitter(width = 0.2), alpha = 0.5) +
+#   ggthemes::theme_clean() +
+#   scale_fill_manual(values = zapotec_palette) +  # Zapotec colors for SDI by Distance
+#   theme(text = element_text(size = 18),
+#         axis.text = element_text(size = 12),
+#         axis.title = element_text(size = 14),
+#         legend.position = "none") +
+#   labs(x = "Layer", y = "logSDI")
+# 
+# 
+# # Plot B - SDI vs Volume with Layer color (A1/A2 Palette for "Layer" colors)
+# plot_SDI_scatter <- Dataset_cores %>%
+#   filter(Layer != "A0", Core.type != "Shatter") %>%
+#   ggplot(aes(x = log10(Volume), y = logSDI, color = Layer)) +
+#   geom_point(alpha = 0.9, size = 3.2) +
+#   ggthemes::theme_clean() +
+#   theme(text = element_text(size = 18),
+#         axis.text = element_text(size = 12),
+#         axis.title = element_text(size = 14),
+#         legend.position = "bottom") +
+#   labs(x = "logVolume", y = "logSDI", color = "Layer") +
+#   scale_color_manual(values = A1_A2_palette)  # A1/A2 palette for Layer color
+# 
+# # Add Bipolar cores with distinct shape
+# bipolar_cores <- Dataset_cores %>%
+#   filter(Core.classification == "Bipolar", Layer != "A0", Core.type != "Shatter")
+# 
+# plot_SDI_scatter <- plot_SDI_scatter + 
+#   ggrepel::geom_label_repel(data = bipolar_cores, 
+#                             aes(x = log10(Volume), y = logSDI, label = "Bipolar"), 
+#                             size = 3, color = "black", fill = "white", 
+#                             box.padding = 0.5, point.padding = 0.5) +
+#   geom_point(data = bipolar_cores, 
+#              aes(x = log10(Volume), y = logSDI), 
+#              shape = 21, fill = "orange", size = 4, stroke = 1.5, color = "black") 
+# 
+# plot_SDI_A2_A1 <- Dataset_cores %>%
+#   filter(Layer != "A0", Core.type != "Shatter") %>%
+#   ggplot(aes(x = Layer, y = logSDI)) +
+#   geom_boxplot(aes(fill = Layer)) +  # Use the A1/A2 palette
+#   stat_compare_means(comparison = comparison.A2.A1) +
+#   geom_jitter(shape = 16, position = position_jitter(width = 0.2), alpha = 0.5) +
+#   ggthemes::theme_clean() +
+#   scale_fill_manual(values = A1_A2_palette) +  # A1/A2 colors for this plot
+#   theme(text = element_text(size = 18),
+#         axis.text = element_text(size = 12),
+#         axis.title = element_text(size = 14),
+#         legend.position = "none") +
+#   labs(x = "Layer", y = "logSDI")
+# 
+# # Plot D - SDI by Layer and raw.material.lumped (Adobe-inspired colors)
+# plot_SDI_boxplot_rawmat <- Dataset_cores %>%
+#   filter(Layer != "A0", Core.type != "Shatter", raw.material.lumped != "Undetermined") %>%
+#   mutate(raw.material.lumped = case_when(
+#     raw.material.lumped == "Local" ~ "Local",
+#     raw.material.lumped %in% c("Circum.local", "Distant", "Very.distant") ~ "Non-local"
+#   )) %>%
+#   ggplot(aes(x = Layer, y = logSDI)) +
+#   geom_boxplot(aes(fill = Layer)) +  # Color by Layer (A1, A2)
+#   stat_compare_means(comparison = comparison.A2.A1) +
+#   geom_jitter(shape = 16, position = position_jitter(width = 0.2), alpha = 0.5) +
+#   ggthemes::theme_clean() +
+#   scale_fill_manual(values = A1_A2_palette) +  # Use the Layer palette
+#   theme(text = element_text(size = 18),
+#         axis.text = element_text(size = 12),
+#         axis.title = element_text(size = 14),
+#         legend.position = "none") +
+#   labs(x = "Layer", y = "logSDI") +
+#   facet_wrap(~ raw.material.lumped)
+# 
+# 
+# # Combine all four plots into a single figure
+# Figure_7 <- ggarrange(plot_SDI_distance, plot_SDI_scatter, plot_SDI_A2_A1, plot_SDI_boxplot_rawmat,
+#                       labels = c("a", "b", "c", "d"),
+#                       ncol = 2, nrow = 2, 
+#                       common.legend = FALSE)
+# 
+# # Save the plot as a high-resolution TIFF file
+# ggsave("../output/Figure_7.tiff", plot = Figure_7, width = 11.69, height = 8.27, units = "in", dpi = 300)
+
+```
+
+```{r, echo=FALSE, warning=FALSE}
+# Modify the Dataset_cores to lump raw.material.lumped categories and filter out "Undetermined"
+Boxplot_SDI <- Dataset_cores %>%
+  filter(Layer != "A0", Core.type != "Shatter", raw.material.lumped != "Undetermined") %>%
+  mutate(raw.material.lumped = case_when(
+    raw.material.lumped == "Local" ~ "Local",
+    raw.material.lumped %in% c("Circum.local", "Distant", "Very.distant") ~ "Non-local"
+  )) %>%
+  ggplot(aes(x = Layer, y = logSDI)) +
+  geom_boxplot(aes(fill = Layer)) +
+  stat_compare_means(comparison = comparison.A2.A1) +
+  geom_jitter(shape = 16, position = position_jitter(width = 0.2), alpha = 0.5) +
+  ggthemes::theme_clean() +
+  scale_fill_manual(values = met.brewer("Navajo")) +
+  theme(text = element_text(size = 18),
+        axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14),
+        legend.position = "none") +
+  labs(x = "Layer", y = "logSDI") +
+  # geom_text(data = . %>%
+  #             group_by(Layer) %>%
+  #             mutate(is_outlier = logSDI > quantile(logSDI, 0.75) + 1.5 * IQR(logSDI) | 
+  #                                 logSDI < quantile(logSDI, 0.25) - 1.5 * IQR(logSDI)) %>%
+  #             filter(is_outlier),
+  #           aes(label = ID), 
+  #           position = position_jitter(width = 0.2), 
+  #           size = 3, 
+  #           hjust = 1.1) +
+  facet_wrap(~ raw.material.lumped)
+
+
+scatter_SDI <- Dataset_cores %>%
+  filter(Layer != "A0", Core.type != "Shatter") %>%
+  ggplot(aes(x = log10(Volume), y = logSDI, color = Layer)) +
+  geom_point(alpha = 0.9, size = 3.2) +
+  ggthemes::theme_clean() +
+  theme(text = element_text(size = 18),
+        axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14),
+        legend.position = "") +
+  labs(x = "logVolume", y = "logSDI", color = "Layer") +
+  scale_color_manual(values = met.brewer("Navajo"))
+
+# Filter Bipolar cores
+bipolar_cores <- Dataset_cores %>%
+  filter(Core.classification == "Bipolar", Layer != "A0", Core.type != "Shatter")
+
+# Add distinct shape for Bipolar cores
+scatter_SDI <- scatter_SDI +
+  geom_point(data = bipolar_cores, 
+             aes(x = log10(Volume), y = logSDI), 
+             shape = 21, fill = "blue", size = 4, stroke = 1.5, color = "black") +
+  ggrepel::geom_label_repel(data = bipolar_cores, 
+                   aes(x = log10(Volume), y = logSDI, label = "Bipolar"), 
+                   size = 3, color = "black", fill = "white", box.padding = 0.5, point.padding = 0.5)
+
+
+# scatter_SDI <- Dataset_cores %>%
+#   filter(Layer != "A0", Core.type != "Shatter") %>%
+#   ggplot(aes(x = log10(Volume), y = logSDI, color = Layer)) +
+#   geom_point(alpha = 0.9, size = 3.2) +
+#   ggthemes::theme_clean() +
+#   theme(text = element_text(size = 18),
+#         axis.text = element_text(size = 12),
+#         axis.title = element_text(size = 14),
+#         legend.position = "right") +
+#   labs(x = "logVolume", y = "logSDI", color = "Layer") +
+#       scale_color_manual(values = met.brewer("Navajo"))
+
+# Arrange the plots in a single figure
+Figure_7 <- ggarrange(scatter_SDI, Boxplot_SDI,
+                      labels = c("A", "B"), nrow = 1, common.legend = TRUE, legend = "bottom"
+                      )
+
+# Display the figure
+Figure_7
+
+# Save the plot as a high-resolution TIFF file
+ggsave("../output/Figure_7.tiff", plot = Figure_7, width = 11.69, height = 4.13, units = "in", dpi = 300)
+```
+
