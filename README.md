@@ -15,11 +15,11 @@ The content available at the provided Zenodo DOI reproduces the results as docum
 **Armando Falcucci, Stefano Bertola, Martina Parise, Matteo Del Rio, Julien Riel-Salvatore, Fabio Negrino** *A crossroads between the Mediterranean and the Alps: Lithic technology and mobility in the Aurignacian of Riparo Bombrini (Liguria, northwestern Italy)* _Journal Name, Volume Number, Page Numbers_ (in preparation). DOI: [Insert DOI]
 
 ### Abstract:
-TO DO
+Riparo Bombrini is a collapsed rockshelter within the Balzi Rossi site complex, located at the intersection of the Maritime Alps, the Apennines, and the Tyrrhenian Sea. This unique environmental setting has served as a crucial biogeographical corridor for human mobility along the Liguro-Provençal Basin during the Paleolithic. Multidisciplinary research at Bombrini has revealed three distinct Aurignacian layers overlying a semi-sterile Mousterian layer. This paper explores the internal variability of the Protoaurignacian at the site by analyzing lithic assemblages from layers A2 and A1, along with a previously undescribed Early Aurignacian assemblage from the uppermost layer, A0. Through an analysis of assemblage integrity, lithic technology, and raw material procurement, we identify distinct mobility and land-use strategies employed by early Homo sapiens foraging groups, despite overall technological uniformity. Notably, lithic tools from both the Protoaurignacian and Early Aurignacian layers were frequently made from exogenous raw materials, many sourced from over 200 km away, spanning regions from the Rhône Valley in southeastern France to the central Apennines in Italy. The technological variability of these raw materials and their changing frequencies over time enabled us to identify distinct patterns of logistical and residential mobility, as noted in previous research at the site. Comparative analysis with other sites in adjacent regions further reveals that foragers possessed a sophisticated knowledge of their territories, challenging the long-standing view of the Protoaurignacian as the result of pioneering groups entering unfamiliar lands.
 
 ### Keywords:
 
-Early Upper Paleolithic; *Homo sapiens*; MIS3; Henrich Stadial 4; Lithic Technology; Human Behavior; Mobility; Raw material procurement
+Human behavior; *Homo sapiens*; Upper Paleolithic; Foragers; Raw material procurement; Reduction intensity; MIS3
 
 ### Overview of Contents and How to Reproduce:
 

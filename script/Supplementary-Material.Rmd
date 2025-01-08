@@ -1,6 +1,7 @@
 ---
-title: Supplementary Material (SM)
+title: Supplementary Material File
 subtitle: "A crossroads between the Mediterranean and the Alps: Lithic technology and mobility in the Aurignacian of Riparo Bombrini (Liguria, northwestern Italy)"
+author: Armando Falcucci, Stefano Bertola, Martina Parise, Matteo Del Rio, Julien Riel-Salvatore & Fabio Negrino
 knit: (function(input, ...) {
     rmarkdown::render(
       input,
@@ -165,7 +166,7 @@ ggarrange(bladelet.plat.width, bladelet.plat.thickness,
           labels = c("a", "b"))
 
 ```
-  **Figure S#.**  Boxplots showing the distribution of platform width (a) and thickness (b) values in layers A1 and A2. The figure includes the results of the Wilcoxon tests, which confirm the similarity of these attributes between the two layers.
+  **Figure S3.**  Boxplots showing the distribution of platform width (a) and thickness (b) values in layers A1 and A2. The figure includes the results of the Wilcoxon tests, which confirm the similarity of these attributes between the two layers.
 
 <br>
 
@@ -237,7 +238,7 @@ bladelet.thickness <- Dataset %>%
 ggarrange(bladelet.length, bladelet.width, bladelet.thickness,
           labels = c("a", "b", "c"), nrow=1)
 ```
-  **Figure S#.** Boxplots showing the distribution of length (a), width (b), and thickness (c) of non-modified complete bladelets from layers A1 and A2. The figure includes the results of the Wilcoxon tests, which show that the only statistically significant difference is in the width of the bladelets.
+  **Figure S4.** Boxplots showing the distribution of length (a), width (b), and thickness (c) of non-modified complete bladelets from layers A1 and A2. The figure includes the results of the Wilcoxon tests, which show that the only statistically significant difference is in the width of the bladelets.
 
 <br>
 
@@ -284,7 +285,7 @@ bladelet.robustness <- Dataset %>%
 ggarrange(bladelet.elongation, bladelet.robustness,
           labels = c("a", "b"), nrow=1)
 ```
-  **Figure S#.** Boxplots showing the distribution of elongation (a) and robustness (b) ratios of bladelets in layers A1 and A2. The figure includes the results of the Wilcoxon tests, which confirm the similarity of these attributes between the layers.
+  **Figure S5.** Boxplots showing the distribution of elongation (a) and robustness (b) ratios of bladelets in layers A1 and A2. The figure includes the results of the Wilcoxon tests, which confirm the similarity of these attributes between the layers.
 
 <br>
 
@@ -373,7 +374,7 @@ ggarrange(bladelet.A2.length.raw.mat, bladelet.A2.width.raw.mat, bladelet.A2.thi
           common.legend = TRUE,
           legend = "bottom")
 ```
-  **Fig. S#.** Boxplots showing the distribution of length (a), width (b), and thickness (c) of non-modified complete bladelets from layers A1 and A2, categorized by local and non-local (i.e., circum-local, distant, and very distant) raw materials. The figure includes the results of the Wilcoxon tests, which show no statistically significant differences in any of the comparisons.
+  **Figure S6.** Boxplots showing the distribution of length (a), width (b), and thickness (c) of non-modified complete bladelets from layers A1 and A2, categorized by local and non-local (i.e., circum-local, distant, and very distant) raw materials. The figure includes the results of the Wilcoxon tests, which show no statistically significant differences in any of the comparisons.
 
 <br>
 
@@ -383,7 +384,7 @@ ggarrange(bladelet.A2.length.raw.mat, bladelet.A2.width.raw.mat, bladelet.A2.thi
 knitr::include_graphics("../output/figures/Figure_Screeplot.png")
 # in the R chunk you can add "fig.cap="Screeplot"" to put the caption below
 ```
-  **Figure S#.** Scree plot illustrating the proportion of variance explained by the first eight principal components of the 2D outline analysis.
+  **Figure S7.** Scree plot illustrating the proportion of variance explained by the first eight principal components of the 2D outline analysis.
 
 <br>
 
@@ -393,7 +394,7 @@ knitr::include_graphics("../output/figures/Figure_Screeplot.png")
 knitr::include_graphics("../output/figures/Shape_variation_plot.png")
 # in the R chunk you can add "fig.cap="Screeplot"" to put the caption below
 ```
-  **Figure S#.** Plot displaying the shape variation across the first three principal components (PCs) of the 2D outline analysis. The mean shape and standard deviation (SD) are shown for each component.
+  **Figure S8.** Plot displaying the shape variation across the first three principal components (PCs) of the 2D outline analysis. The mean shape and standard deviation (SD) are shown for each component.
 
 <br>
 
@@ -409,7 +410,7 @@ Dataset %>%
   results.subtitle = F,
   palette = "Set3")
 ```
-  **Figure S#.** Selection of blank types used for fabricating tools, excluding retouched bladelets, across layers A1 and A2. Rounded percentages are provided within the bars.
+  **Figure S9.** Selection of blank types used for fabricating tools, excluding retouched bladelets, across layers A1 and A2. Rounded percentages are provided within the bars.
 
 <br>
 
@@ -479,7 +480,7 @@ ret.bladelet.thickness <- Dataset %>%
 ggarrange(ret.bladelet.length, ret.bladelet.width, ret.bladelet.thickness,
           labels = c("a", "b", "c"), nrow=1)
 ```
-  **Figure S#.** Boxplots showing the distribution of length (a), width (b), and thickness (c) of retouched bladelets from layers A1 and A2. For width and thickness, broken bladelets are also included. The figure includes the results of the Wilcoxon tests, which confirm the high similarity between retouched bladelets from layers A1 and A2.
+  **Figure S10.** Boxplots showing the distribution of length (a), width (b), and thickness (c) of retouched bladelets from layers A1 and A2. For width and thickness, broken bladelets are also included. The figure includes the results of the Wilcoxon tests, which confirm the high similarity between retouched bladelets from layers A1 and A2.
 
 <br>
 
@@ -497,7 +498,7 @@ Dataset_cores %>%
         legend.position = "right") +
   labs(x = "logVolume", y = "logSDI", color = "Layer")
 ```
-  **Figure S#.** Logarithmically transformed Scar Density Index (logSDI) plotted against the logarithmically transformed volume (logVolume) of cores from layer A0, colored by technological classification. Core shatters are excluded from the analysis.
+  **Figure S11.** Logarithmically transformed Scar Density Index (logSDI) plotted against the logarithmically transformed volume (logVolume) of cores from layer A0, colored by technological classification. Core shatters are excluded from the analysis.
 
 <br>
 
@@ -882,7 +883,7 @@ Dataset %>%
 ```
   **Table S16.** Distribution of cross-section types among bladelet blanks and tools across layers A1 and A2, with percentages provided in brackets.
 
-```{r, echo=FALSE, warning=FALSE}
+```{r, echo=FALSE, warning=FALSE, include=FALSE}
 Dataset %>%
   filter(Blank == "Bladelet",
            Preservation == "Complete",
@@ -920,17 +921,18 @@ Dataset %>%
 # Load the saved Rdata file
 load("../data/correlation_results_table.Rdata")
 
-# Modify the column names if needed
 colnames(correlation_results) <- c("Measurement", "Principal Component", "Spearman", "p-value")
 
-# Create a flextable
+correlation_results <- correlation_results %>%
+  mutate(across(where(is.numeric), ~round(., 3)))
+
 correlation_results %>%
   flextable() %>%
   theme_vanilla() %>%
   set_table_properties(layout = "autofit") %>%
   autofit()
 ```  
-  **Table S18.**  Results of the Spearman tests on the correlation between size (length, width, and thickness) and the first three principal components (PC1, PC2, and PC3) of the bladelet outline analysis. CORRECT
+  **Table S18.**  Results of the Spearman tests on the correlation between size (length, width, and thickness) and the first three principal components (PC1, PC2, and PC3) of the bladelet outline analysis.
 
 <br>
 

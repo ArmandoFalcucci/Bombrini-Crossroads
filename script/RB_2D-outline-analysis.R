@@ -80,7 +80,7 @@ GM_bladelets_screeplot <- Momocs::scree_plot(GM_bladelets_centered_scaled_rotate
 
 # Save screeplot
 ggsave(GM_bladelets_screeplot,
-       filename = "output/figures/Figure_Screeplot.png",
+       filename = "output/figures/Figure_S7.png",
        width = 4, height = 4, dpi = 300, units = "in", device = "png")
 
 # 9. Shape variation plot ----
@@ -99,7 +99,7 @@ GM_bladelets_shape_variation_flipped <- GM_bladelets_shape_variation$gg +
 
 # Save shape variation plot
 ggsave(GM_bladelets_shape_variation_flipped,
-       filename = "output/figures/Shape_variation_plot.png",
+       filename = "output/figures/Figure_S8.png",
        width = 5, height = 5, dpi = 300, units = "in", device = "png")
 
 #10 Merging datasets to produce figures and run other analyses ####
@@ -166,6 +166,30 @@ colnames(correlation_results) <- c("Measurement", "Principal Component", "Spearm
 save(correlation_results, file = "data/correlation_results_table.Rdata")
 
 # 12. Plotting results of PCA ----
+
+Means_PC1_PC3.layer <- Dataset_2DGM %>%                                               #subset dataset by Artifact Class and calculate means for PCs for each Class
+  group_by(Layer) %>% 
+  dplyr::summarise(PC1 = mean(PC1),
+                   PC2 = mean(PC2),
+                   PC3 = mean(PC3))
+
+Means_PC1_PC3.provenience <- Dataset_2DGM %>%                                      #subset dataset by Artifact Class and calculate means for PCs for each Class
+  group_by(raw.material.provenience) %>% 
+  dplyr::summarise(PC1 = mean(PC1),
+                   PC2 = mean(PC2),
+                   PC3 = mean(PC3))
+
+Means_PC1_PC3.source <- Dataset_2DGM %>% 
+  mutate(raw.material.lumped = fct_relevel(raw.material.lumped, "Local", "Circum.local", "Distant", "Very.distant")) %>%
+  mutate(raw.material.lumped = recode(raw.material.lumped, Circum.local = "Circum-local", Very.distant = "Very distant")) %>%
+  #subset dataset by Artifact Class and calculate means for PCs for each Class
+  group_by(raw.material.lumped) %>% 
+  dplyr::summarise(PC1 = mean(PC1),
+                   PC2 = mean(PC2),
+                   PC3 = mean(PC3))
+
+
+
 PC1toPC2.layer <- ggplot(data = Dataset_2DGM, aes(x = PC1, y = PC2, color = Layer)) +
   geom_point(size = 1.5, alpha = 0.5) +
   labs(y= "PC2 (14% of total variance)", x = "PC1 (62% of total variance)") +
@@ -239,11 +263,8 @@ PC1toPC2.plots.combined <- ggarrange(PC1toPC2.layer, PC1toPC2.provenience,
     plot.title = element_text(size = 20)
   )
 
-# Save the combined plot as an A4 size image
-ggsave("output/figures/combined_plot.pdf", PC1toPC2.plots.combined, 
-       width = 11.7, height = 6.3, units = "in", dpi = 300)  
 
-ggsave("output/figures/2dgmfigure.tiff", PC1toPC2.plots.combined, width = 11.7, height = 6.3, units = "in")
+ggsave("output/figures/Figure_7.tiff", PC1toPC2.plots.combined, width = 11.7, height = 6.3, units = "in")
 
 
 # 13. PERMANOVA ----
@@ -271,6 +292,8 @@ Dataset_2DGM <- as.data.frame(Dataset_2DGM)
 # Subset the columns correctly (make sure PC1 to PC9 are the correct column names)
 PC.data.subset.GM <- Dataset_2DGM[, c("PC1", "PC2", "PC3", "PC4", "PC5", "PC6", "PC7", "PC8", "PC9")]
 
+rownames_DATASETS <- as.factor(Dataset_2DGM$Layer_RawMat)
+
 # Disparity test 
 data_subsets <- dispRity::custom.subsets(PC.data.subset.GM, group = rownames_DATASETS)
 data_boot <- boot.matrix(data_subsets, bootstraps = 10000)
@@ -284,5 +307,43 @@ disparity.shape.formatted_results <- as.data.frame(pairwise_results.disparity.sh
 disparity.shape.formatted_results <- disparity.shape.formatted_results %>%
   mutate(p.value = format.pval(p.value, digits = 3))
 
+# Disparity Plot
+data_names <- names(data_disp$disparity)
+disparity_df_list <- list()
+for(i in data_names){
+  disparity_df_list[[i]] <- data.frame(Context = paste0(i, 
+                                                        "\n(n=",nrow(data_disp$subsets[[i]]$elements),")"),
+                                       disparity = as.vector(data_disp$disparity[[i]][[2]]),
+                                       nelements = nrow(data_disp$subsets[[i]]$elements),
+                                       TS = i)
+}
+disparity_df_discrete_GM <- do.call(rbind.data.frame, disparity_df_list)
+
+# Plot with the updated categories (Local vs Non-local)
+disparity_df_discrete_GM.plot <- 
+  disparity_df_discrete_GM %>%
+  ggplot(aes(x = Context, y = disparity)) +
+  geom_violin(aes(fill = TS)) + 
+  geom_boxplot(notch = TRUE, width = 0.1, fill = "white", color = "black") +
+  theme_bw() +
+  ggtitle(NULL) +
+  xlab("") + 
+  ylab("Disparity") +
+  theme(plot.title = element_text(hjust = 0.5, size = 12, face = "bold"),
+        axis.text = element_text(size = 16),
+        axis.text.x = element_text(angle = 45, vjust = 0.5, hjust = 0.5, size = 16),
+        axis.title.y = element_text(vjust = 0),
+        axis.title = element_text(size = 18)) +
+  scale_fill_manual(values = c("A1, Local" = "#C75C4A",  # Second Zapotec color for Local
+                               "A2, Local" = "#C75C4A",  # Second Zapotec color for Local
+                               "A1, Non-local" = "#A58D65",  # Third Zapotec color for Non-local
+                               "A2, Non-local" = "#A58D65"   # Third Zapotec color for Non-local
+  )) +
+  guides(color = FALSE, fill = FALSE)
+
+
+# Display the plot
+disparity_df_discrete_GM.plot
+
 # Save the disparity test plot
-ggsave("output/figures/Figure_Disp.tiff", disparity_df_discrete_GM.plot, width = 6, height = 4.5, units = "in")
+ggsave("output/figures/Figure_8.tiff", disparity_df_discrete_GM.plot, width = 6, height = 4.5, units = "in")
