@@ -2,7 +2,7 @@
 
 ### Compendium DOI:
 
-_add after first round of review_
+_to add after first round of review_
 
 The content available at the provided Zenodo DOI reproduces the results as documented in the publication. The files hosted at <https://github.com/ArmandoFalcucci/Bombrini-Crossroads> represent the developmental versions and might have undergone modifications since the paper's publication.
 

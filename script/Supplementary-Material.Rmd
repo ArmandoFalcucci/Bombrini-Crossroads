@@ -1,7 +1,7 @@
 ---
 title: Supplementary Material File
 subtitle: "A crossroads between the Mediterranean and the Alps: Lithic technology and mobility in the Aurignacian of Riparo Bombrini (Liguria, northwestern Italy)"
-author: Armando Falcucci, Stefano Bertola, Martina Parise, Matteo Del Rio, Julien Riel-Salvatore & Fabio Negrino
+author: 
 knit: (function(input, ...) {
     rmarkdown::render(
       input,

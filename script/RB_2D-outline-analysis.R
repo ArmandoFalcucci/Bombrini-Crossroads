@@ -266,6 +266,7 @@ PC1toPC2.plots.combined <- ggarrange(PC1toPC2.layer, PC1toPC2.provenience,
 
 ggsave("output/figures/Figure_7.tiff", PC1toPC2.plots.combined, width = 11.7, height = 6.3, units = "in")
 
+ggsave("output/figures/Figure_7.pdf", PC1toPC2.plots.combined, width = 11.7, height = 6.3, units = "in")
 
 # 13. PERMANOVA ----
 min_n_PCs.2DGM <- Momocs::scree_min(GM_bladelets_centered_scaled_rotated.PCA, prop = 0.95) 
