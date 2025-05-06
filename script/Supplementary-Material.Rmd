@@ -38,8 +38,11 @@ library(ggpubr)
 library(xtable)
 library(flextable)
 
-Dataset <- read.csv("../data/RB_dataset.csv")
-Dataset_cores <- read.csv("../data/RB_dataset_cores.csv")
+Dataset <- read.csv("../data/RB_dataset.csv") %>%
+  filter(Layer != "A1-A2")
+
+Dataset_cores <- read.csv("../data/RB_dataset_cores.csv") %>%
+  filter(Layer != "A1-A2")
 
 comparison.A2.A1 <- list(c("A2", "A1"))
 
