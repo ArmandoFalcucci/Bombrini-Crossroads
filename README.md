@@ -2,7 +2,7 @@
 
 ### Compendium DOI:
 
-[![DOI](https://zenodo.org/badge/XXX.svg)](https://zenodo.org/doi/10.5281/XXXX)
+[![DOI](https://zenodo.org/badge/15363594.svg)](https://zenodo.org/doi/10.5281/zenodo.15363594)
 
 The content available at the provided Zenodo URL reproduces the results as documented in the publication. The files hosted at <https://github.com/ArmandoFalcucci/Bombrini-Crossroads> represent the developmental versions and might have undergone modifications since the paper's publication.
 
@@ -19,7 +19,7 @@ Riparo Bombrini is a collapsed rockshelter within the Balzi Rossi site complex, 
 
 ### Keywords:
 
-Early Upper Paleolithic; Foragers; Raw material procurement; Reduction intensity
+Early Upper Paleolithic; Foragers; Raw material Procurement; Site-Use Strategies; Reduction Intensity
 
 ### Overview of Contents and How to Reproduce:
 
@@ -33,7 +33,7 @@ To replicate the results from the paper, follow these steps:
 
 1. Download the entire repository.
 2. Open the `Bombrini-Crossroads.Rproj` R project file.
-3. Navigate to the `script` folder, where you will find the R scripts arranged in a numbered order for reproducibility.
+3. Navigate to the `script` folder, where you will find the R scripts (i.e., `RB_2D-outline-analysis`, `RB_Tables-Figures`, `Supplementary-Material`)
 
 For consistent results, the `renv` package (v. 1.0.3) was used, following the procedures outlined in its vignette. All analyses were performed using R 4.3.1 on Microsoft Windows 10.0.19045 (64-bit). Necessary packages are provided within the `renv` folder.
 
