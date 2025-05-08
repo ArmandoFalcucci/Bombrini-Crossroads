@@ -2,7 +2,7 @@
 
 ### Compendium DOI:
 
-[![DOI](https://zenodo.org/badge/15363594.svg)](https://zenodo.org/doi/10.5281/zenodo.15363594)
+[![DOI](https://zenodo.org/badge/15363594.svg)](https://zenodo.org/doi/10.5281/zenodo.15363594)  
 
 The content available at the provided Zenodo URL reproduces the results as documented in the publication. The files hosted at <https://github.com/ArmandoFalcucci/Bombrini-Crossroads> represent the developmental versions and might have undergone modifications since the paper's publication.
 
