@@ -37,7 +37,6 @@ Dataset_cores <- read.csv("../data/RB_dataset_cores.csv") %>%
 # 
 comparison.A2.A1 <- list(c("A2", "A1"))
 
-# Set A4 dimensions in inches (8.27 x 11.69 inches)
 a4_width <- 8.27
 a4_height <- 11.69
 
@@ -49,22 +48,21 @@ custom.palette.rawMat <- c(
 )
 
 zapotec_palette <- c(
-  "Local" = "#D14A34",        # Bold red
-  "Circum-local" = "#C09B29", # Rich blue
-  "Distant" = "#3D6F9E",      # Earthy orange
-  "Very distant" = "#F1A64C"# Golden yellow
+  "Local" = "#D14A34",
+  "Circum-local" = "#C09B29",
+  "Distant" = "#3D6F9E",
+  "Very distant" = "#F1A64C"
 )
 
 A1_A2_palette <- c(
-  "A1" = "#6F9E58",   # Calming green for A1
-  "A2" = "#8A3E28"    # Deep red for A2
+  "A1" = "#6F9E58",
+  "A2" = "#8A3E28"
 )
 
 Local_NonLocal_palette <- c(
-  "Local" = "#C75C4A",   # Warm terracotta red for Local (Adobe color)
-  "Non-local" = "#A58D65" # Muted sandy beige for Non-local (Desert earth tone)
+  "Local" = "#C75C4A",
+  "Non-local" = "#A58D65"
 )
-
 ```
 
 ## Tables
@@ -72,19 +70,17 @@ Local_NonLocal_palette <- c(
 ### Table 1
 
 ```{r}
-# Step 1: Create the data frame with raw counts
 data.conjoins <- data.frame(
   Layer = c("A1", "A1-A2", "A2", "Total"),
   Proximal_n = c(287, 12, 354, 653),
-  Proximal_pct = c(0, 0, 0, 0),  # Placeholder for percentages
+  Proximal_pct = c(0, 0, 0, 0),
   Mesial_n = c(200, 4, 249, 453),
-  Mesial_pct = c(0, 0, 0, 0),    # Placeholder for percentages
+  Mesial_pct = c(0, 0, 0, 0),
   Distal_n = c(200, 6, 204, 410),
-  Distal_pct = c(0, 0, 0, 0),    # Placeholder for percentages
+  Distal_pct = c(0, 0, 0, 0),
   Total_n = c(687, 22, 807, 1516)
 )
 
-# Step 2: Calculate percentages for each layer
 data.conjoins <- data.conjoins %>%
   mutate(
     Proximal_pct = round((Proximal_n / Total_n) * 100, 1),
@@ -92,7 +88,6 @@ data.conjoins <- data.conjoins %>%
     Distal_pct = round((Distal_n / Total_n) * 100, 1)
   )
 
-# Step 3: Create the final table
 Table_1 <- data.conjoins %>%
   select(Layer, Proximal_n, Proximal_pct, Mesial_n, Mesial_pct, Distal_n, Distal_pct, Total_n) %>%
   dplyr::rename(
@@ -105,14 +100,13 @@ Table_1 <- data.conjoins %>%
     `Total, n` = Total_n
   )
 
-# Step 4: Display the table
 Table_1 %>%
   flextable() %>%
   theme_vanilla() %>%
   set_table_properties(layout = "autofit") %>%
   autofit()
 ```
-  *Table 1.*
+  **Table 1.**
 
 ### Table 2
 
@@ -128,27 +122,9 @@ tabyl(Dataset, Layer, Class) %>%
   set_table_properties(layout = "autofit") %>%
   autofit()
 ```
+  **Table 2.**
 
-### Table 3
-
-```{r, echo=FALSE, warning=FALSE}
-Dataset %>%
-  filter(Class != "Pebble") %>%
-  mutate(raw.material.type = recode(raw.material.type, Unknown = "Undetermined"),
-         raw.material.type = fct_infreq(raw.material.type)) %>%
-  tabyl(raw.material.type, Layer) %>%
-  adorn_totals("col") %>%
-  adorn_percentages("col") %>%
-  adorn_pct_formatting(digits = 1) %>%
-  adorn_ns(position = "front") %>%
-  adorn_title(placement = "top") %>%
-  kbl(align = "lccc") %>%
-  row_spec(1, bold = T, hline_after = F) %>%
-  kable_classic_2(lightable_options = "striped", full_width = F)
-```
-  **Table 3.**
-
-### Table 3
+### Table 4
 
 ```{r, echo=FALSE, warning=FALSE}
 
@@ -170,8 +146,9 @@ Dataset_cores %>%
   kbl(align = "lccccccccr") %>%
   kable_classic_2(lightable_options = "striped", full_width = F)
 ```
+**Table 4.**
 
-### Table 4
+### Table 5
 
 ```{r, echo=FALSE, warning=FALSE}
 Dataset_cores %>%
@@ -189,9 +166,9 @@ Dataset_cores %>%
   kbl(align = "lccccccccr") %>%
   kable_classic_2(lightable_options = "striped", full_width = F)
 ```
-  **Table 4.**
+  **Table 5.**
 
-### Table 5
+### Table 6
 
 ```{r, echo=FALSE, warning=FALSE}
 Dataset %>%
@@ -200,7 +177,8 @@ Dataset %>%
     Typology.new = recode(Typology.new, 
                           "Endscraper" = "Endscraper simple",
                           "Burin" = "Burin simple",
-                          "Flake retouched" = "Retouched flake")
+                          "Flake retouched" = "Retouched flake",
+                          "Compsite tool" = "Composite tool")
   ) %>%
   tabyl(Typology.new, Layer) %>%
   adorn_totals("col") %>%
@@ -212,7 +190,7 @@ Dataset %>%
   kbl(align = "lccccr") %>%
   kable_classic(full_width = F)
 ```
-  *Table 5.*
+  *Table 6.*
 
 ```{r, echo=FALSE, warning=FALSE}
 Dataset %>%
@@ -221,7 +199,7 @@ Dataset %>%
   chisq.test()
 ```
 
-### Table 6
+### Table 7
 
 ```{r, echo=FALSE, warning=FALSE}
 Dataset %>%
@@ -237,7 +215,7 @@ Dataset %>%
   set_table_properties(layout = "autofit") %>%
   autofit()
 ```
-  *Table 6.*
+  *Table 7.*
 
 
 ```{r, echo=FALSE, warning=FALSE}
@@ -359,7 +337,7 @@ Fig3e <- Dataset_cores %>%
   filter(raw.material.lumped != "not.available" & raw.material.lumped != "Undetermined", Laminar == "yes", Layer != "A0") %>%
   mutate(raw.material.lumped = recode(raw.material.lumped, Circum.local = "Circum-local", Very.distant = "Very distant")) %>%
   mutate(raw.material.lumped = fct_relevel(raw.material.lumped, "Local", "Circum-local", "Distant", "Very distant")) %>%
-  droplevels() %>%  # Drop unused factor levels
+  droplevels() %>%
   ggstatsplot::ggbarstats(
     x = raw.material.lumped,  
     y = Layer,
@@ -384,7 +362,7 @@ Fig3f <- Dataset_cores %>%
   filter(raw.material.lumped != "not.available" & raw.material.lumped != "Undetermined", Laminar == "no", Layer != "A0") %>%
   mutate(raw.material.lumped = recode(raw.material.lumped, Circum.local = "Circum-local", Very.distant = "Very distant")) %>%
   mutate(raw.material.lumped = fct_relevel(raw.material.lumped, "Local", "Circum-local", "Distant", "Very distant")) %>%
-  droplevels() %>%  # Drop unused factor levels
+  droplevels() %>%
   ggstatsplot::ggbarstats(
     x = raw.material.lumped,  
     y = Layer,
@@ -413,9 +391,7 @@ Figure_3 <- (Fig3a | Fig3b) /
 
 Figure_3
 
- 
-# # Save the plot as a PDF file
-ggsave("../output/figures/Figure_3.pdf", plot = Figure_3, width = a4_width, height = a4_height, units = "in") # made in pdf and then double legend removed in Illustrator
+ggsave("../output/figures/Figure_3.pdf", plot = Figure_3, width = a4_width, height = a4_height, units = "in")
 ```
   **Figure 3.**
 
@@ -499,7 +475,7 @@ bladelet.A1.thickness.raw.mat <- Dataset %>%
   stat_compare_means(label.y = 9) +
   geom_jitter(shape = 16, position = position_jitter(width = 0.2), alpha = 0.2, size = 0.7) +
   ggthemes::theme_clean() +
-  scale_fill_manual(values = Local_NonLocal_palette) +  # Use the custom palette here
+  scale_fill_manual(values = Local_NonLocal_palette) +
   theme(
     text = element_text(size = 16),
     axis.text = element_text(size = 14),
@@ -511,16 +487,13 @@ bladelet.A1.thickness.raw.mat <- Dataset %>%
   ) +
   labs(y = "Thickness (mm)")
 
-# Arrange the plots in a single figure
 Figure_6 <- ggarrange(bladelet.A1.length.raw.mat, bladelet.A1.width.raw.mat, bladelet.A1.thickness.raw.mat,
                       labels = c("a", "b", "c"), nrow = 1,
                       common.legend = TRUE,
                       legend = "bottom")
 
-# Display the figure
 Figure_6
 
-# Save the plot as a high-resolution TIFF file
 ggsave("../output/figures/Figure_6.tiff", plot = Figure_6, width = 11.69, height = 4.13, units = "in", dpi = 300)
 ```
   *Figure 6.*
@@ -528,7 +501,6 @@ ggsave("../output/figures/Figure_6.tiff", plot = Figure_6, width = 11.69, height
 ### Figure 9
 
 ```{r}
-# Plot A - SDI by Distance (Zapotec Palette)
 plot_SDI_distance <- Dataset_cores %>%
   filter(Layer != "A0", Core.type != "Shatter", raw.material.lumped != "Undetermined") %>%
   mutate(raw.material.lumped = fct_relevel(raw.material.lumped, "Local", "Circum.local", "Distant", "Very.distant")) %>%
@@ -537,32 +509,29 @@ plot_SDI_distance <- Dataset_cores %>%
   geom_boxplot(aes(fill = raw.material.lumped)) +  # Use the Zapotec palette
   geom_jitter(shape = 16, position = position_jitter(width = 0.2), alpha = 0.5) +
   ggthemes::theme_clean() +
-  scale_fill_manual(values = zapotec_palette) +  # Zapotec colors for SDI by Distance
+  scale_fill_manual(values = zapotec_palette) +
   theme(
-    text = element_text(size = 20),  # Increased general text size
-    axis.text = element_text(size = 16),  # Increased axis text size
-    axis.title = element_text(size = 18),  # Increased axis title size
+    text = element_text(size = 20),
+    axis.text = element_text(size = 16),
+    axis.title = element_text(size = 18),
     legend.position = "none"
   ) +
   labs(x = "Layer", y = "logSDI")
 
-
-# Plot B - SDI vs Volume with Layer color (A1/A2 Palette for "Layer" colors)
 plot_SDI_scatter <- Dataset_cores %>%
   filter(Layer != "A0", Core.type != "Shatter") %>%
   ggplot(aes(x = log10(Volume), y = logSDI, color = Layer)) +
   geom_point(alpha = 0.9, size = 3.2) +
   ggthemes::theme_clean() +
   theme(
-    text = element_text(size = 20),  # Increased general text size
-    axis.text = element_text(size = 16),  # Increased axis text size
-    axis.title = element_text(size = 18),  # Increased axis title size
+    text = element_text(size = 20),
+    axis.text = element_text(size = 16),
+    axis.title = element_text(size = 18),
     legend.position = "bottom"
   ) +
   labs(x = "logVolume", y = "logSDI", color = "Layer") +
-  scale_color_manual(values = A1_A2_palette)  # A1/A2 palette for Layer color
+  scale_color_manual(values = A1_A2_palette)
 
-# Add Bipolar cores with distinct shape
 bipolar_cores <- Dataset_cores %>%
   filter(Core.classification == "Bipolar", Layer != "A0", Core.type != "Shatter")
 
@@ -578,20 +547,19 @@ plot_SDI_scatter <- plot_SDI_scatter +
 plot_SDI_A2_A1 <- Dataset_cores %>%
   filter(Layer != "A0", Core.type != "Shatter") %>%
   ggplot(aes(x = Layer, y = logSDI)) +
-  geom_boxplot(aes(fill = Layer)) +  # Use the A1/A2 palette
+  geom_boxplot(aes(fill = Layer)) +
   stat_compare_means(comparison = comparison.A2.A1) +
   geom_jitter(shape = 16, position = position_jitter(width = 0.2), alpha = 0.5) +
   ggthemes::theme_clean() +
-  scale_fill_manual(values = A1_A2_palette) +  # A1/A2 colors for this plot
+  scale_fill_manual(values = A1_A2_palette) +
   theme(
-    text = element_text(size = 20),  # Increased general text size
-    axis.text = element_text(size = 16),  # Increased axis text size
-    axis.title = element_text(size = 18),  # Increased axis title size
+    text = element_text(size = 20),
+    axis.text = element_text(size = 16),
+    axis.title = element_text(size = 18),
     legend.position = "none"
   ) +
   labs(x = "Layer", y = "logSDI")
 
-# Plot D - SDI by Layer and raw.material.lumped (Adobe-inspired colors)
 plot_SDI_boxplot_rawmat <- Dataset_cores %>%
   filter(Layer != "A0", Core.type != "Shatter", raw.material.lumped != "Undetermined") %>%
   mutate(raw.material.lumped = case_when(
@@ -599,28 +567,25 @@ plot_SDI_boxplot_rawmat <- Dataset_cores %>%
     raw.material.lumped %in% c("Circum.local", "Distant", "Very.distant") ~ "Non-local"
   )) %>%
   ggplot(aes(x = Layer, y = logSDI)) +
-  geom_boxplot(aes(fill = Layer)) +  # Color by Layer (A1, A2)
+  geom_boxplot(aes(fill = Layer)) +
   stat_compare_means(comparison = comparison.A2.A1) +
   geom_jitter(shape = 16, position = position_jitter(width = 0.2), alpha = 0.5) +
   ggthemes::theme_clean() +
-  scale_fill_manual(values = A1_A2_palette) +  # Use the Layer palette
+  scale_fill_manual(values = A1_A2_palette) +
   theme(
-    text = element_text(size = 20),  # Increased general text size
-    axis.text = element_text(size = 16),  # Increased axis text size
-    axis.title = element_text(size = 18),  # Increased axis title size
+    text = element_text(size = 20),
+    axis.text = element_text(size = 16),
+    axis.title = element_text(size = 18),
     legend.position = "none"
   ) +
   labs(x = "Layer", y = "logSDI") +
   facet_wrap(~ raw.material.lumped)
 
-
-# Combine all four plots into a single figure
 Figure_7 <- ggarrange(plot_SDI_distance, plot_SDI_scatter, plot_SDI_A2_A1, plot_SDI_boxplot_rawmat,
                       labels = c("a", "b", "c", "d"),
                       ncol = 2, nrow = 2, 
                       common.legend = FALSE,
                        font.label = list(size = 18))
 
-# Save the plot as a high-resolution TIFF file
 ggsave("../output/figures/Figure_9.tiff", plot = Figure_7, width = 11.69, height = 8.27, units = "in", dpi = 300)
 ```
